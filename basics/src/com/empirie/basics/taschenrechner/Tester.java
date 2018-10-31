@@ -17,6 +17,10 @@ public class Tester {
         to.isValid("6-5+8.333332-15");    
         to.isValid("2+25");    
         to.isValid("1(1*(2+3))");
+        
+        System.out.println("Test Ausgabe");
+        
+        
         to.isValid("-2+((-6-3)-2)");    //-> hier endlos schleife
 		to.isValid("(8 + 2) / 5  ");   // -> hier fehler
 		to.isValid("2*3-5 + ((8 - (3 + 2) / 3 ) * 1 + 2 / 1) -15"); // hier fehler    
