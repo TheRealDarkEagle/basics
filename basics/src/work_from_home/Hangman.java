@@ -7,15 +7,7 @@ import java.util.Scanner;
 
 public class Hangman {
 
-	/**
-	 * @ToDo	visuellen hangman machen 
-	 * 			
-	 * 
-	 */
-	
 	static int life =8;
-
-	;
 	private static Scanner character;
 	char[] usedChars = new char[25];
 	int u = 0;
