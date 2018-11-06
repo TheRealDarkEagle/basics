@@ -41,6 +41,7 @@ public class Hangman {
 	 * Eingabe des zu erratenden Wortes -> momentan Obsolet!
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String insertWord() {
 		System.out.println("Geben Sie bitte Ihr Wort ein!: ");
 		Scanner sc = new Scanner(System.in);
@@ -97,11 +98,12 @@ public class Hangman {
 			guessedWord = guessedWord+theWord[i];		
 		}
 		if(wort.equals(guessedWord)) {
-			visualWin();
 			printOnScreen(theWord);
 			System.out.println();
 			System.out.println("Gewonnen!");
-			return "Hurra!! Gewonnen!";
+			visualWin();
+			return "";
+			
 		}else {
 			return gameLogic(wort,theWord);
 			
