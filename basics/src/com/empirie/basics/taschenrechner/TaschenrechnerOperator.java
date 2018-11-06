@@ -1,12 +1,31 @@
 package com.empirie.basics.taschenrechner;
 
 public class TaschenrechnerOperator {
-	
-	//Prüft ob Eingabe richtige Anzahl an Klammern hat
-	public void isValid(String aufgabe) {
-		aufgabe = aufgabe.replaceAll(" ", "");
+	/**
+	 * Start des Taschenrechner´s
+	 * @param task
+	 * @return
+	 */
+	public String getResult(String task) {
+		if(isValid(task)) {
+			task = task.replaceAll(" ", "");
+			System.out.print(task);
+			task = setMultiplyPoint(task);
+			System.out.print(" = ");
+			System.out.println(extractInParentheses(task));
+		}else {
+			System.out.println("Fehler bei Ihrer Eingabe! Bitte Ueberpruefen!: "+ task);
+		}
+		return task;
+	}
+	/**
+	 * Prüft die Eingabe auf gleiche Menge der Klammernpaare
+	 * @param task
+	 * @return
+	 */
+	private boolean isValid(String task) {
  		int counter = 0;
-		char[] isValidArray = aufgabe.toCharArray();
+		char[] isValidArray = task.toCharArray();
 		for(int i=0;i<isValidArray.length;i++) {
 			if(isValidArray[i] == '(') {
 				counter++;
@@ -15,164 +34,195 @@ public class TaschenrechnerOperator {
 			}
 		}if(counter == 0) {
 			
-			System.out.print(aufgabe);
-			aufgabe = setMultiplyPoint(aufgabe);
-			System.out.print(" = ");
-			System.out.println(new TaschenrechnerOperator().ausklammern(aufgabe));
+			return true;
 		}else {
-			System.out.println("Fehler bei Ihrer Eingabe! Bitte Ueberpruefen!: "+ aufgabe);
+			return false;
 		}
 	}
-	
-	//Sucht Klammernpaare heraus und gibt diese an istOperator weiter
-	public String ausklammern(String aufgabe){
-		if(aufgabe.contains("(")||aufgabe.contains("+")||aufgabe.contains("-")||aufgabe.contains("*")||aufgabe.contains("/")){
-			if(aufgabe.contains("(")) {													
-				int anfangKlammer = aufgabe.lastIndexOf('(');															// letzte (
-				int endeKlammer = aufgabe.indexOf(")", anfangKlammer);													// erste )
-				String vorKlammer = aufgabe.substring(0, anfangKlammer);												// alles vor letzter (
-				String inKlammer = aufgabe.substring(anfangKlammer+1, endeKlammer);										// inhalt der Klammer
-				String nachKlammer = aufgabe.substring(endeKlammer+1, aufgabe.length());								// alles nach erster ) 
-				if(inKlammer.contains("/")||inKlammer.contains("*")||inKlammer.contains("-")||inKlammer.contains("+")
-						&&inKlammer.charAt(0)!='-') {
- 					return ausklammern(aufgabe=vorKlammer+ausklammern(istOperator(inKlammer))+nachKlammer);
+	/**
+	 * Gibt alles zwischen letzter ( und erster ) an searchForOperator weiter
+	 * @param task
+	 * @return
+	 */
+	private String extractInParentheses(String task){
+		if(task.contains("(")||task.contains("+")||task.contains("-")||task.contains("*")||task.contains("/")){
+			if(task.contains("(")) {													
+				int openParentheses = task.lastIndexOf('(');															// letzte (
+				int endingParentheses = task.indexOf(")", openParentheses);													// erste )
+				String beforeParentheses = task.substring(0, openParentheses);												// alles vor letzter (
+				String inParentheses = task.substring(openParentheses+1, endingParentheses);										// inhalt der Klammer
+				String afterParentheses = task.substring(endingParentheses+1, task.length());								// alles nach erster ) 
+				//Wenn Operator vorhanden und - nicht an erster Stelle
+				if(inParentheses.contains("/")||
+				   inParentheses.contains("*")||
+				   inParentheses.contains("-")||
+				   inParentheses.contains("+")&&
+				   inParentheses.charAt(0)!='-') {
+ 					return extractInParentheses(task=beforeParentheses+extractInParentheses(searchForOperator(inParentheses))+afterParentheses);
 				}
-	 			return ausklammern(vorKlammer+istOperator(inKlammer)+nachKlammer);
-			}else if(aufgabe.contains("/")||aufgabe.contains("*")||aufgabe.contains("-")||aufgabe.contains("+")) {
-				if(aufgabe.charAt(0)=='-'){
-					for(int i=1;i<aufgabe.length();i++) {
-						int temp = aufgabe.charAt(i);
-						if(temp==42||
-						   temp==47||
-						   temp==43||
-						   temp==45) {
-							return ausklammern(istOperator(aufgabe));
-						}
+	 			return extractInParentheses(beforeParentheses+searchForOperator(inParentheses)+afterParentheses);
+	 			//Wenn ein Operator vorhanden ist 
+			}else if(task.contains("/")||
+					 task.contains("*")||
+					 task.contains("-")||
+					 task.contains("+")){
+				//Prüft ob Minus ein Vorzeichen ist und alleine steht
+				if(task.charAt(0)=='-'){
+					if(indexOfOperator(task)!=0) {
+						return extractInParentheses(searchForOperator(task));
 					}
-//					if(aufgabe.contains("+")||aufgabe.contains("*")||aufgabe.contains("/")) {
-//						return ausklammern(istOperator(aufgabe));
-//					}
-					return aufgabe;
+					return task;
 				}
-				return ausklammern(istOperator(aufgabe));	
+				return extractInParentheses(searchForOperator(task));	
 			}else {
-				return aufgabe;
+				return task;
 			}
 		}
-		return aufgabe;
+		return task;
 	}
-	
-	//Setzt * wenn vor einer ( kein Operator steht 
-	public String setMultiplyPoint(String aufgabe) {
-		for(int i= 1;i<aufgabe.length();i++) {
-			int temp = aufgabe.charAt(i);
-			if(temp==40) {
-				char zuPruefen = aufgabe.charAt(i-1);
-				if(zuPruefen != '+'&&
-				   zuPruefen != '-'&&
-				   zuPruefen != '*'&&
-				   zuPruefen != '/'&&
-				   zuPruefen != '('&&
-				   zuPruefen != ')'  ){
-					String vor = aufgabe.substring(0, i);		
-					String nach = aufgabe.substring(i, aufgabe.length());
-					return setMultiplyPoint(aufgabe = vor+"*"+nach);
-					
-				}
-			}
-		}
-		return aufgabe;
-	}
-	
-	//Durchsucht nach Operatoren
-	public String istOperator(String aufgabe) {
-		if(aufgabe.contains("*")||aufgabe.contains("/")) {
-			for(int i=1;i<aufgabe.length();i++) {
-				int temp = aufgabe.charAt(i);
-				if(temp==42) {																						// *-Operator
-					aufgabe = wirdBerechnet(aufgabe,"*",i);
-					return aufgabe;
-				}else if(temp==47){																					// /-Operator
-					aufgabe = wirdBerechnet(aufgabe,"/",i);
-					return aufgabe;
-				}
-			}
-		}else if(aufgabe.contains("+")||aufgabe.contains("-")) {
-			for(int i=1;i<aufgabe.length();i++) {
-				int temp = aufgabe.charAt(i);
-				if(temp==43) {																						// +-Operator
-					aufgabe = wirdBerechnet(aufgabe,"+",i);
-					return aufgabe;
-				}else if(temp==45){																					// --Operator
-					aufgabe = wirdBerechnet(aufgabe,"-",i);
-					return aufgabe;
-				}
-			}
-		}
-		return aufgabe;
-	}
+	/**
+	 * Setzen des * vor geöffneter Klammer wenn kein anderer Operator vorhanden sein sollte
+	 * @param task
+	 * @return
+	 */
+	private String setMultiplyPoint(String task) {
+		for(int i= 1;i<task.length();i++) {
+			char openParentheses = task.charAt(i);
+			if(openParentheses=='(') {
+				char beforePhrase = task.charAt(i-1);
 
-	//Extrahiert die linke Zahl von Operator 
-	public String linkeZahl(String aufgabe, int istOperator) {
-		String links = aufgabe.substring(0, istOperator);
-		for(int i=links.length()-1;i>0;i--) {
-			int temp = links.charAt(i);
-			if(temp==42||temp==45||temp==43||temp==47) {
-				int vorOperator = aufgabe.charAt(i-1);
-				if(vorOperator==42||vorOperator==45||vorOperator==43||vorOperator==47) {
-					return links = links.substring(i-1, links.length());
-				}else {
-					return links = links.substring(i+1, links.length());
+				/**  
+				 * 		@todo - kann man hier ggf. kürzer abfragen ob "zuPruefen" eine Zahl ist oder nicht?  
+				 */
+				if(beforePhrase != '+'&&
+				   beforePhrase != '-'&&
+				   beforePhrase != '*'&&
+				   beforePhrase != '/'&&
+				   beforePhrase != '('  ){
+					String beforeOpenParentheses = task.substring(0, i);		
+					String afterOpenParentheses = task.substring(i, task.length());
+					return setMultiplyPoint(task = beforeOpenParentheses+"*"+afterOpenParentheses);
 				}
 			}
 		}
-		return links;
+		return task;
+	}
+	/**
+	 * Durchsucht Aufgabe auf Operator 
+	 * @param task
+	 * @return
+	 */
+	private String searchForOperator(String task) {
+		if(task.contains("*")||task.contains("/")) {
+			for(int i=1;i<task.length();i++) {
+				if(task.charAt(i)=='*') {																						
+					task = calculate(task,"*",i);
+					return task;
+				}else if(task.charAt(i)=='/'){																					
+					task = calculate(task,"/",i);
+					return task;
+				}
+			}
+		}else if(task.contains("+")||task.contains("-")) {
+			for(int i=1;i<task.length();i++) {
+				if(task.charAt(i)=='+') {																						
+					task = calculate(task,"+",i);
+					return task;
+				}else if(task.charAt(i)=='-'){																				
+					task = calculate(task,"-",i);
+					return task;
+				}
+			}
+		}
+		return task;
+	}
+	/**
+	 * "Extrahiert" die linke zahl von Operator 
+	 * @param task
+	 * @param istOperator
+	 * @return
+	 */
+	private String leftNumber(String task, int istOperator) {
+		String left = task.substring(0, istOperator);
+		for(int a = left.length()-1;a>-1;a--){
+ 			char zahlenStart=left.charAt(a);
+ 			if(zahlenStart=='*'||zahlenStart=='/'||zahlenStart=='+'||zahlenStart=='-' && a!=0) {
+				left = left.substring(a+1, left.length());
+				return left;
+ 			}else if(left.charAt(a)=='-' && left.charAt(a+1)=='-') {
+ 				return left= left.substring(a, left.length());
+ 			}
+		}
+		return left;
 	}
 		
-	
-	//Extrahiert die rechte Zahl von Operator
-	public String rechteZahl(String aufgabe, int istOperator) {
-		String rechts = aufgabe.substring(istOperator+1, aufgabe.length());
-		for(int a = 1;a<rechts.length();a++) {
-			int zahlenStart = rechts.charAt(a);
-			if(zahlenStart==42||zahlenStart==47||zahlenStart==43||zahlenStart==45) {
-				rechts = rechts.substring(0, a);
-				return rechts;
+	/**
+	 * "Extrahiert" die rechte Zahl von Operator
+	 * @param task
+	 * @param istOperator
+	 * @return
+	 */
+	private String rightNumber(String task, int istOperator) {
+		String rightSide = task.substring(istOperator+1, task.length());
+		int indexOfOperator = indexOfOperator(rightSide);
+		if(indexOfOperator!=0) {
+			rightSide = rightSide.substring(0, indexOfOperator);
+			return rightSide;
 			}
-		}
-		return rechts;
+		return rightSide;
 	}
 
-	//Berechnet linke mit rechter Zahl und fügt Summe in Aufgabe ein 
-	public String wirdBerechnet(String aufgabe, String operator, int indexOperator) {
+	/**
+	 * Berechnet linkeZahl mit rechteZahl -> gibt summe als String zurück
+	 * @param task
+	 * @param operator
+	 * @param indexOperator
+	 * @return
+	 */
+	private String calculate(String task, String operator, int indexOperator) {
 		double summe;
-		double linkeZahl = Double.parseDouble(linkeZahl(aufgabe,indexOperator));									// -> linke zahl  
-		double rechteZahl = Double.parseDouble(rechteZahl(aufgabe,indexOperator));									// -> rechte zahl 
+		double numberLeftSide = Double.parseDouble(leftNumber(task,indexOperator));									// -> linke zahl  
+		double numberRightSide = Double.parseDouble(rightNumber(task,indexOperator));								// -> rechte zahl 
 		switch(operator) {
 		case "*":
-			summe = linkeZahl*rechteZahl;
+			summe = numberLeftSide*numberRightSide;
 			break;
 		case "/":
-			summe = linkeZahl/rechteZahl;
+			summe = numberLeftSide/numberRightSide;
 			break;
 		case "+":
-			summe = linkeZahl+rechteZahl;
+			summe = numberLeftSide+numberRightSide;
 			break;
 		case "-":
-			summe = linkeZahl-rechteZahl;
+			summe = numberLeftSide-numberRightSide;
 			break;
 		default: 
-			return aufgabe;
+			return task;
 		} 
 		//zuschneiden des Strings - einsetzen des Ergebnis
-		String summeString = Double.toString(summe);
-		//int laengeLinks=linkeZahl(aufgabe,aufgabe.indexOf(operator)).length();
-		String zahlLinks = linkeZahl(aufgabe,indexOperator);
-		int laengeLinks = zahlLinks.length();
-		String teilLinks = aufgabe.substring(0, indexOperator-(laengeLinks));
-		String zahlRechts = rechteZahl(aufgabe,indexOperator);
-		int laengeRechts = zahlRechts.length()+1;
-		String teilRechts = aufgabe.substring(indexOperator+(laengeRechts));
-		return aufgabe = teilLinks + summeString + teilRechts;		
+		String sumString = Double.toString(summe);
+		String leftFactor = leftNumber(task,indexOperator);
+		String rightFactor = rightNumber(task,indexOperator);
+		int lengthLeft = leftFactor.length();
+		int lengthRight = rightFactor.length()+1;
+		String beforeLeftNumber = task.substring(0, indexOperator-(lengthLeft));
+		String afterRightNumber = task.substring(indexOperator+(lengthRight));
+		return task = beforeLeftNumber + sumString + afterRightNumber;		
+	}
+	/**
+	 * durchsucht task nach Operator und gibt Stelle dessen zurück
+	 * @param task
+	 * @return
+	 */
+	private int indexOfOperator(String task) {
+		for(int i = 1; i<task.length(); i++) {
+			if(task.charAt(i)=='*'||
+			   task.charAt(i)=='/'||
+			   task.charAt(i)=='+'||
+			   task.charAt(i)=='-') {
+					return i;
+			}
+		}
+		return 0;
 	}
 }
