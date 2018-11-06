@@ -14,8 +14,8 @@ public class Hangman {
 	 */
 	
 	static int life =8;
-	int toWin;
-	int isRight;
+
+	;
 	private static Scanner character;
 	char[] usedChars = new char[25];
 	int u = 0;
@@ -26,7 +26,6 @@ public class Hangman {
 	public void startGame() {
 		String wort = getWordFromList();
 		wort = toSmall(wort);
-		toWin = wort.length();
 		char[] theWord = new char[wort.length()];
 		for(int i=0;i<theWord.length;i++) {
 			theWord[i]='.';
@@ -42,14 +41,14 @@ public class Hangman {
 	 * Eingabe des zu erratenden Wortes -> momentan Obsolet!
 	 * @return
 	 */
-//	private String insertWord() {
-//		System.out.println("Geben Sie bitte Ihr Wort ein!: ");
-//		Scanner sc = new Scanner(System.in);
-//		String wort = sc.next();
-//		sc.close();
-//		wort = toSmall(wort);
-//		return wort;
-//	}
+	private String insertWord() {
+		System.out.println("Geben Sie bitte Ihr Wort ein!: ");
+		Scanner sc = new Scanner(System.in);
+		String wort = sc.next();
+		sc.close();
+		wort = toSmall(wort);
+		return wort;
+	}
 	
 	/**
 	 * Eingabe des Buchstaben 
@@ -66,7 +65,6 @@ public class Hangman {
 	 * @param wort
 	 * @return
 	 */
-	
 	private static String toSmall(String wort) {
 		wort = wort.toLowerCase();
 		return wort;
@@ -99,6 +97,7 @@ public class Hangman {
 			guessedWord = guessedWord+theWord[i];		
 		}
 		if(wort.equals(guessedWord)) {
+			visualWin();
 			printOnScreen(theWord);
 			System.out.println();
 			System.out.println("Gewonnen!");
@@ -129,7 +128,6 @@ public class Hangman {
 				for(int i=0;i<wort.length();i++) {
 					if(wort.charAt(i)==toTest) {
 						theWord[i]=toTest;
-						isRight+=1;
 					}
 				}
 				alreadyUsedChars(toTest);
@@ -188,6 +186,12 @@ private String getWordFromList() {
 		list.add("Haengewandschrankhalterung");
 		list.add("lokomotive");
 		list.add("photovoltaikanlage");
+		list.add("Autowaschanlage");
+		list.add("Element");
+		list.add("Wagenheber");
+		list.add("Haarwurzel");
+		list.add("develop");
+		list.add("Anwendungsentwickler");
 		int i = random(list.size());
 		return list.get(i);
 	}
@@ -311,5 +315,20 @@ private String getWordFromList() {
 		}
 	}
 
+	/**
+	 * Visuell Hangman v.Gewonnen
+	 */
+	private void visualWin() {
+		System.out.println(" ________");
+		System.out.println(" |      |");
+		System.out.println(" |        ");
+		System.out.println(" |        ");
+		System.out.println(" |      0 ");
+		System.out.println(" |     \\|/  ");
+		System.out.println("_|____  |  ");
+		System.out.println("|     |/_\\_");
+		System.out.println("|_________|");
+		}
+	
 }
 	
