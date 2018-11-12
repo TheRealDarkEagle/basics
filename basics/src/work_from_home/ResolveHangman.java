@@ -2,59 +2,72 @@ package work_from_home;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Scanner;
 
-
-public class Hangman {
-
-	static int life =8;
-	private static Scanner character;
-	char[] usedChars = new char[25];
-	int u = 0;
-	ArrayList<String> list = new ArrayList<String>();
+public class ResolveHangman {
 	
+	String potencialChars = "abcdefghijklmnopqrstuvwxyz";
+	int[] countChars= new int[potencialChars.length()];
+	char[] allChars = potencialChars.toCharArray();
+	static int life =8;
+	ArrayList<Character> usedCharsList = new ArrayList<Character>();
+	ArrayList<String> list = new ArrayList<String>();
+
+	//hangman
 	/**
 	 * Startpunkt der Klasse -> aufrufen aller anderen Methoden 
 	 */
 	public void startGame() {
 		listing();
+		countAndSort();
 		String wort = random();
 		wort = toSmall(wort);
 		char[] theWord = new char[wort.length()];
 		for(int i=0;i<theWord.length;i++) {
 			theWord[i]='.';
 		}
-		for(int s=0;s<usedChars.length;s++) {
-			usedChars[s]='.';
-		}
 		gameLogic(wort,theWord);
 		
 	}
-
+	
+	//hangman
 	/**
-	 * Eingabe des zu erratenden Wortes -> momentan Obsolet!
+	 * Aufruf aller Spielmethoden solange leben!=0
+	 * @param wort
+	 * @param theWord
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private String insertWord() {
-		System.out.println("Geben Sie bitte Ihr Wort ein!: ");
-		Scanner sc = new Scanner(System.in);
-		String wort = sc.next();
-		sc.close();
-		wort = toSmall(wort);
+	private String gameLogic(String wort,char[] theWord) {
+		while(life != 0) {
+			hangingManVisual(life);
+			System.out.println("Sie haben noch "+life+" Versuche");
+			printOnScreen(theWord);
+			System.out.println();
+			Character toTest = getChar();
+			System.out.println("Bitte geben sie Ihren Buchstaben ein: "+toTest);
+			String a = toTest.toString();
+			//prüfe ob buchstabe vorhanden
+			if(wort.contains(a)) {
+				for(int i=0;i<wort.length();i++) {
+					if(wort.charAt(i)==toTest) {
+						theWord[i]=toTest;
+					}
+				}
+				charExist(toTest);
+				alreadyUsedChars(toTest);
+				return isWin(wort,theWord);
+			}else {
+				life -=1;
+				charDoesNotExist(toTest);
+				alreadyUsedChars(toTest);
+				return gameLogic(wort,theWord);
+			}
+		}
+		hangingManVisual(life);
+		System.out.println("Leider Verloren :(");
 		return wort;
 	}
 	
-	/**
-	 * Eingabe des Buchstaben 
-	 * @return
-	 */
-	public static char letter() {
-		character = new Scanner(System.in);
-		char c = character.next().charAt(0);
-		return c;
-	}
-	
+	//hangman
 	/**
 	 * Kleinschreibung des zu suchenden Wortes 
 	 * @param wort
@@ -65,6 +78,7 @@ public class Hangman {
 		return wort;
 	}
 	
+	//hangman
 	/**
 	 * befüllung der leeren Array Felder mit . -> wenn in array[i]=='.' darstellung durch _ 
 	 * @param theWord
@@ -80,6 +94,7 @@ public class Hangman {
 		}
 	}
 
+	//hangman
 	/**
 	 * Prüft bisher eingegebene Buchstaben ob zusammengesetzt gleich dem Suchwort.
 	 * @param wort
@@ -104,73 +119,159 @@ public class Hangman {
 		}
 	}
 	
+	
+	//hangman
 	/**
-	 * Aufruf aller Spielmethoden solange leben!=0
-	 * @param wort
-	 * @param theWord
-	 * @return
+	 * Erstelle liste mit Wörtern der vorherigen Liste, in dessen der Buchstabe vorhanden ist 
+	 * @param charExist
 	 */
-	private String gameLogic(String wort,char[] theWord) {
-		while(life != 0) {
-			hangingManVisual(life);
-			System.out.println("Sie haben noch "+life+" Versuche");
-			printOnScreen(theWord);
-			System.out.println();
-			System.out.println("Bitte geben sie Ihren Buchstaben ein:");
-			Character toTest = letter();
-			String a = toTest.toString();
-			//prüfe ob buchstabe vorhanden
-			if(wort.contains(a)) {
-				for(int i=0;i<wort.length();i++) {
-					if(wort.charAt(i)==toTest) {
-						theWord[i]=toTest;
-					}
-				}
-				alreadyUsedChars(toTest);
-				return isWin(wort,theWord);
-			}else {
-				life -=1;
-				alreadyUsedChars(toTest);
-				return gameLogic(wort,theWord);
+	private void charExist(Character charExist) {
+		ArrayList<String> shadowList = new ArrayList<String>();
+		shadowList.addAll(list);
+		list.clear();
+		for(int i=0;i<shadowList.size();i++) {
+			if(shadowList.get(i).contains(charExist.toString())) {
+				list.add(shadowList.get(i));
 			}
 		}
-		hangingManVisual(life);
-		System.out.println("Leider Verloren :(");
-		return wort;
+		list.trimToSize();
 	}
 	
+	//solver
 	/**
-	 * Array welches bisher eingegebene Buchstaben beeinhaltet - Prüft ob Buchstabe schon eingegeben wurde
+	 * "Leert" das Array countChars
+	 */
+	private void resetCounterFromDigitList() {
+		for (int i = 0; i < countChars.length; i++) {
+			countChars[i] = 0;
+		}
+	}
+	
+	//solver
+	/**
+	 * Erstelle Liste mit Wörtern der vorherigen Liste, in dessen der Buchstabe NICHT vorhanden ist 
+	 * @param charDoesNotExist
+	 */
+	private void charDoesNotExist(Character charDoesNotExist) {
+		ArrayList<String> shadowList = new ArrayList<String>();
+		shadowList.addAll(list);
+		list.clear();
+		for(int i=0;i<shadowList.size();i++) {
+			if(!shadowList.get(i).contains(charDoesNotExist.toString())) {
+				list.add(shadowList.get(i));
+			}
+		}
+		list.trimToSize();
+	}
+	
+	//solver
+	/**
+	 * aufrufen der Methoden: resetCounterFromDigitList,countCharacter,sortArrays
+	 */
+	private void countAndSort() {
+		resetCounterFromDigitList();
+		countCharacter(countChars,allChars);
+		sortArrays(countChars,allChars);
+	}
+	
+	//solver 
+	/**
+	 * Sucht anhand der Wörterliste den nächhäufigst vorkommenden Buchstaben heraus 
+	 * @return char 
+	 */
+	private char getChar() {
+		countAndSort();
+		int counter=0;
+		int lengeCharArray = potencialChars.length()-1;
+		System.out.println(allChars[lengeCharArray]);
+		char bestChar = potencialChars.charAt(lengeCharArray);
+		while(usedCharsList.contains(bestChar)) {
+			
+			bestChar = allChars[lengeCharArray-counter];
+			counter++;
+		}
+		return bestChar;
+	}
+	
+	//hangman
+	/**
+	 * Prüft ob Buchstabe schon eingegeben wurde
 	 * @param used
 	 */
 	private void alreadyUsedChars(char used) {
-		for(int i=0;i<usedChars.length;i++) {
-			if(usedChars[i]==used) {
-				System.out.println();
-				System.out.println("Fehler! Buchstabe schon benutzt! Bitte versuchen Sie einen anderen Buchstaben");
-				System.out.println();
-				return;
-			}
+		if(usedCharsList.contains(used)) {
+			System.out.println();
+			System.out.println("Fehler! Buchstabe schon benutzt! Bitte versuchen Sie einen anderen Buchstaben");
+			System.out.println();
+			return;
 		}
-		usedChars[u] = used;
+		usedCharsList.add(used);
 		System.out.println();
 		System.out.println("Ihre benutzten Buchstaben:");
-		for(int o=0;o<usedChars.length;o++) {
-			if(usedChars[o]!='.') {
-				System.out.print(usedChars[o]+" ");	
-			}
+		for(int o=0;o<usedCharsList.size();o++) {
+			System.out.print(usedCharsList.get(o)+" ");
 		}
 		System.out.println();
 		System.out.println();
-		u++;
+	}
+	
+	
+	/**
+	 * Zählt alle Buchstaben durch die in der Liste vorhanden sind 
+	 * @param countChars
+	 * @param allChars
+	 */
+	private void countCharacter(int[] countChars,char[] allChars) {
+		String allWords = mergeWordList().toLowerCase();
+		for(int i=0;i<allWords.length();i++) {
+			for(int x=0;x<allChars.length;x++) {
+				if(allChars[x]==allWords.charAt(i)) {
+					countChars[x]++;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Setzt alle wörter zu einem ganzen String zusammen
+	 * @return
+	 */
+	private String mergeWordList() {
+		int sizeOfList = list.size();
+		StringBuilder sb = new StringBuilder(); 
+		for(int a=0;a<sizeOfList;a++) {
+			sb = sb.append(list.get(a));
+		}
+		String allWords = sb.toString();
+		return allWords;
+	}
+	
+	/**
+	 * Sortiert countChars und allChars array nach häufigkeit der vorkommenden Buchstaben (Via BubbleSort)
+	 * @param countChars
+	 * @param allChars
+	 */
+	private void sortArrays(int[] countChars, char[] allChars) {
+		for(int o=0;o<allChars.length;o++) {
+			for(int a=1;a<allChars.length;a++) {
+				if(countChars[a-1]>countChars[a]) {
+					int tempZahl = countChars[a];
+					char tempChar = allChars[a];
+					countChars[a] = countChars[a-1];
+					allChars[a] = allChars[a-1];
+					countChars[a-1] = tempZahl;
+					allChars[a-1] = tempChar;
+					
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Liste mit möglichen Wörtern und heraussuchen eines per Zufall
 	 * @return
 	 */
-	//Erstellen einer Liste mit Wörter
-public void listing() {
+	public void listing() {
 		list.add("Stromaggregat");
 		list.add("Computergehaeuse");
 		list.add("Feuerwerk");
@@ -353,6 +454,5 @@ public void listing() {
 		System.out.println("|     |/_\\_");
 		System.out.println("|_________|");
 		}
-	
 }
 	
