@@ -7,18 +7,31 @@ import java.util.Scanner;
 
 public class Hangman {
 
+	boolean isFirstCharUpperCase = false;
 	static int life =8;
 	private static Scanner character;
 	char[] usedChars = new char[25];
 	int u = 0;
+	private ResolveHangman computer;
 	ArrayList<String> list = new ArrayList<String>();
+	private boolean isHumanPlaying = false;
+	private static boolean wordBeginsUpperCase;
+	
+	public Hangman(boolean isHumanPlaying) {
+		this.isHumanPlaying = isHumanPlaying;
+	}
+	
 	
 	/**
 	 * Startpunkt der Klasse -> aufrufen aller anderen Methoden 
 	 */
 	public void startGame() {
+		if(!isHumanPlaying) {
+			this.computer = new ResolveHangman();
+		}
 		listing();
 		String wort = random();
+		isFirstCharUpperCase(wort);
 		wort = toSmall(wort);
 		char[] theWord = new char[wort.length()];
 		for(int i=0;i<theWord.length;i++) {
@@ -30,6 +43,18 @@ public class Hangman {
 		gameLogic(wort,theWord);
 		
 	}
+
+	private void isFirstCharUpperCase(String wort) {
+		String posibilUpperChars ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		Character firstChar = wort.charAt(0);
+		for(int i =0;i<posibilUpperChars.length();i++) {
+			if(firstChar.equals(posibilUpperChars.charAt(i))) {
+				wordBeginsUpperCase = true;
+			}
+		}
+		
+	}
+
 
 	/**
 	 * Eingabe des zu erratenden Wortes -> momentan Obsolet!
@@ -72,6 +97,13 @@ public class Hangman {
 	private static void printOnScreen(char[] theWord) {
 		for(int i=0;i<theWord.length;i++) {
 			if(theWord[i]!='.') {
+				if(i==0) {
+					if(wordBeginsUpperCase) {
+						Character firstCharShouldBeUpperCase = theWord[0];
+						firstCharShouldBeUpperCase = Character.toUpperCase(theWord[0]);
+						theWord[0] = firstCharShouldBeUpperCase;
+					}
+				}
 				System.out.print(theWord[i]+" ");
 			}else {
 				System.out.print("_ ");
@@ -91,7 +123,7 @@ public class Hangman {
 		for(int i=0;i<theWord.length;i++) {
 			guessedWord = guessedWord+theWord[i];		
 		}
-		if(wort.equals(guessedWord)) {
+		if(wort.toLowerCase().equals(guessedWord.toLowerCase())) {
 			printOnScreen(theWord);
 			System.out.println();
 			System.out.println("Gewonnen!");
@@ -117,7 +149,17 @@ public class Hangman {
 			printOnScreen(theWord);
 			System.out.println();
 			System.out.println("Bitte geben sie Ihren Buchstaben ein:");
-			Character toTest = letter();
+			Character toTest = ' ';
+			if(isHumanPlaying) {
+				toTest = letter();
+			}else {
+				// wenn Buchstabe = an erster stelle -> "a".toUpperCase();
+				// 
+				
+				
+				toTest = computer.getChar(theWord);
+			}
+			
 			String a = toTest.toString();
 			//prüfe ob buchstabe vorhanden
 			if(wort.contains(a)) {
@@ -171,6 +213,7 @@ public class Hangman {
 	 */
 	//Erstellen einer Liste mit Wörter
 public void listing() {
+		list.add("aalfang");
 		list.add("Stromaggregat");
 		list.add("Computergehaeuse");
 		list.add("Feuerwerk");
@@ -226,7 +269,7 @@ public void listing() {
 	private String random() {
 		int maxNumber = list.size();
 		Random wuerfel = new Random();
-		int zahl = wuerfel.nextInt(maxNumber);
+		int zahl = 0+wuerfel.nextInt(maxNumber);
 		String wort = list.get(zahl);
 		return wort;
 	}

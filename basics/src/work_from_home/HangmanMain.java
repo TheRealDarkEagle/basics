@@ -5,14 +5,11 @@ import java.util.Scanner;
 public class HangmanMain {
 	
 	public static void main (String[] args) {
-		
-		Hangman man = new Hangman();
-		ResolveHangman computer = new ResolveHangman();
-		
+		// true wenn ein Mensch spielt, false wenn der Computer
 		System.out.println("#################################################################");
 		System.out.println();
 		System.out.println();
-		System.out.println("       			 Willkommen zu Hangman! Viel Spaß beim Spielen :)");
+		System.out.println("           Willkommen zu Hangman! Viel Spaß beim Spielen :)");
 		System.out.println();
 		System.out.println("Wer soll Spielen? Drücken Sie M fuer Mensch und C für Computer!");
 		Scanner auswahl = new Scanner(System.in);
@@ -22,9 +19,9 @@ public class HangmanMain {
 			throw new IllegalArgumentException("Bitte geben Sie nur einen Buchstaben ein!");
 		}
 		if(auswahlDesSpielers.equals("M") || auswahlDesSpielers.equals("m")) {
-			man.startGame();	
+			new Hangman(true).startGame();	
 		}else if(auswahlDesSpielers.equals("C") || auswahlDesSpielers.equals("c")) {
-			computer.startGame();
+			new Hangman(false).startGame();
 		}
 	}
 }

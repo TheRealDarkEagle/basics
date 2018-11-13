@@ -1,220 +1,224 @@
 package work_from_home;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ResolveHangman {
 	
-	String potencialChars = "abcdefghijklmnopqrstuvwxyz";
-	int[] countChars= new int[potencialChars.length()];
-	char[] allChars = potencialChars.toCharArray();
-	static int life =8;
-	ArrayList<Character> usedCharsList = new ArrayList<Character>();
-	ArrayList<String> list = new ArrayList<String>();
-
-	//hangman
+	private String potencialChars = "abcdefghijklmnopqrstuvwxyz";
+	private int[] countChars= new int[potencialChars.length()];
+	private char[] amountOfCharsInWords = potencialChars.toCharArray();
+	boolean checkedForLength = false; 
+	private ArrayList<Character> usedChars = new ArrayList<Character>();
+	private ArrayList<String> wordList;
+	
+	public ResolveHangman() {
+		this.wordList = this.loadWordsFromFile();
+	}
+	
+	private ArrayList<String> loadWordsManual() {
+		//Datei Einlesen Und Wörter laden:
+		
+		
+		//Aktuell Liste mit Wörtern:
+		ArrayList<String> words = new ArrayList<>();
+		words.add("aalfang");
+		words.add("Stromaggregat");
+		words.add("Computergehaeuse");
+		words.add("Feuerwerk");
+		words.add("Feuerwehr");
+		words.add("Puzzleteil");
+		words.add("Pizzateig");
+		words.add("Gleichberechtigungsbeauftragter");
+		words.add("Haengewandschrankhalterung");
+		words.add("lokomotive");
+		words.add("photovoltaikanlage");
+		words.add("Autowaschanlage");
+		words.add("Element");
+		words.add("Wagenheber");
+		words.add("Haarwurzel");
+		words.add("develop");
+		words.add("Anwendungsentwickler");
+		words.add("Fachmann");
+		words.add("Feuerwehrmann");
+		words.add("Jahr");
+		words.add("Uhr");
+		words.add("Prozent");
+		words.add("Million");
+		words.add("Mensch");
+		words.add("gehen");
+		words.add("verschieden");
+		words.add("Leben");
+		words.add("allerdings");
+		words.add("verstehen");
+		words.add("Mutter");
+		words.add("ueberhaupt");
+		words.add("besonders");
+		words.add("politisch");
+		words.add("Gesellschaft");
+		words.add("moeglichkeit");
+		words.add("Unternehmen");
+		words.add("buch");
+		words.add("haben");
+		words.add("ich");
+		words.add("werden");
+		words.add("sie");
+		words.add("dies");
+		words.add("Grundstuecksverkehrsgenehmigungszustaendigkeitsuebertragungsverordnung");
+		words.add("Rindfleischetikettierungsueberwachungsaufgabenuebertragungsgesetz");
+		words.add("Verkehrsinfrastrukturfinanzierungsgesellschaft");
+		words.add("Gleichgewichtsdichtegradientenzentrifugation");
+		return words;
+	}
+	
+	private ArrayList<String> loadWordsFromFile() {
+		/*
+		 * TODO: lade Wörter von Datei
+		 */
+		return loadWordsManual();
+	}
+	
 	/**
-	 * Startpunkt der Klasse -> aufrufen aller anderen Methoden 
+	 * Findet den naechsten Buchstaben anhand aller Bekannten Wörter 
+	 * @param theWord
+	 * @return
 	 */
-	public void startGame() {
-		listing();
-		countAndSort();
-		String wort = random();
-		wort = toSmall(wort);
-		char[] theWord = new char[wort.length()];
-		for(int i=0;i<theWord.length;i++) {
-			theWord[i]='.';
+	public char getChar(char[] theWord) {
+		StringBuffer mergeAllCharsToString = new StringBuffer();
+		for(int x=0;x<theWord.length;x++) {
+			mergeAllCharsToString = mergeAllCharsToString.append(theWord[x]);
 		}
-		gameLogic(wort,theWord);
+		
+		//Wenn usedChars == empty -> remove alle Einträge mit anderer Länge aus wordList
+		if(usedChars.isEmpty()) {
+			sortFromLength(theWord.length,wordList);
+			return getCharToUse(amountOfCharsInWords);
+		}else{
+			countAndSort();
+			testTheChar(theWord);
+		}
+		System.out.println(wordList);
+		return getCharToUse(amountOfCharsInWords);
+	}
+	
+	/**
+	 * Prüfe ob zuletzt benutzter Buchstabe im Wort vorhanden war
+	 * @param theWord
+	 */
+	private void testTheChar(char[] theWord) {
+		Character lastUsed = usedChars.get(0);
+		StringBuffer arrayIntoString = new StringBuffer();
+		//zuerst muss ich prüfen ob ich gerade in meinem wort den ersten buchstaben herausgefunden habe 
+		if(theWord[0]==Character.toUpperCase(lastUsed)) {
+			Character checkFirstChar = theWord[0];
+			if(!checkFirstChar.toString().equals(potencialChars)) {
+				lastUsed = checkFirstChar;
+				charExist(lastUsed, theWord);
+				}
+		}else {
+			for(int a=0; a<theWord.length;a++) {
+				arrayIntoString = arrayIntoString.append(theWord[a]);
+			}
+			String hasTheWord = ""+arrayIntoString;
+			hasTheWord.toLowerCase();
+			if(hasTheWord.contains(lastUsed.toString())){
+				charExist(lastUsed, theWord);
+			}else {
+				charDoesNotExist(lastUsed, theWord);
+			}
+		}
+	}
+
+	/**
+	 * Entfernt alle Wörter, welche den zuletzt benutzten Buchstaben beinhalten
+	 * @param charExist
+	 * @param theWord
+	 */
+	private void charDoesNotExist(Character charExist,char[] theWord) {
+		for(int a =0; a<wordList.size();a++) {
+			if(wordList.get(a).contains(charExist+"")) {
+				wordList.remove(a);
+			}
+		}
 		
 	}
-	
-	//hangman
-	/**
-	 * Aufruf aller Spielmethoden solange leben!=0
-	 * @param wort
-	 * @param theWord
-	 * @return
-	 */
-	private String gameLogic(String wort,char[] theWord) {
-		while(life != 0) {
-			hangingManVisual(life);
-			System.out.println("Sie haben noch "+life+" Versuche");
-			printOnScreen(theWord);
-			System.out.println();
-			Character toTest = getChar();
-			System.out.println("Bitte geben sie Ihren Buchstaben ein: "+toTest);
-			String a = toTest.toString();
-			//prüfe ob buchstabe vorhanden
-			if(wort.contains(a)) {
-				for(int i=0;i<wort.length();i++) {
-					if(wort.charAt(i)==toTest) {
-						theWord[i]=toTest;
-					}
-				}
-				charExist(toTest);
-				alreadyUsedChars(toTest);
-				return isWin(wort,theWord);
-			}else {
-				life -=1;
-				charDoesNotExist(toTest);
-				alreadyUsedChars(toTest);
-				return gameLogic(wort,theWord);
-			}
-		}
-		hangingManVisual(life);
-		System.out.println("Leider Verloren :(");
-		return wort;
-	}
-	
-	//hangman
-	/**
-	 * Kleinschreibung des zu suchenden Wortes 
-	 * @param wort
-	 * @return
-	 */
-	private static String toSmall(String wort) {
-		wort = wort.toLowerCase();
-		return wort;
-	}
-	
-	//hangman
-	/**
-	 * befüllung der leeren Array Felder mit . -> wenn in array[i]=='.' darstellung durch _ 
-	 * @param theWord
-	 */
-	private static void printOnScreen(char[] theWord) {
-		for(int i=0;i<theWord.length;i++) {
-			if(theWord[i]!='.') {
-				System.out.print(theWord[i]+" ");
-			}else {
-				System.out.print("_ ");
-				
-			}
-		}
-	}
 
-	//hangman
 	/**
-	 * Prüft bisher eingegebene Buchstaben ob zusammengesetzt gleich dem Suchwort.
-	 * @param wort
-	 * @param theWord
-	 * @return
+	 * Setzt alle Felder das Array countChars auf 0
 	 */
-	private String isWin(String wort,char[] theWord) {
-		String guessedWord ="";
-		for(int i=0;i<theWord.length;i++) {
-			guessedWord = guessedWord+theWord[i];		
-		}
-		if(wort.equals(guessedWord)) {
-			printOnScreen(theWord);
-			System.out.println();
-			System.out.println("Gewonnen!");
-			visualWin();
-			return "";
-			
-		}else {
-			return gameLogic(wort,theWord);
-			
-		}
-	}
-	
-	
-	//hangman
-	/**
-	 * Erstelle liste mit Wörtern der vorherigen Liste, in dessen der Buchstabe vorhanden ist 
-	 * @param charExist
-	 */
-	private void charExist(Character charExist) {
-		ArrayList<String> shadowList = new ArrayList<String>();
-		shadowList.addAll(list);
-		list.clear();
-		for(int i=0;i<shadowList.size();i++) {
-			if(shadowList.get(i).contains(charExist.toString())) {
-				list.add(shadowList.get(i));
-			}
-		}
-		list.trimToSize();
-	}
-	
-	//solver
-	/**
-	 * "Leert" das Array countChars
-	 */
-	private void resetCounterFromDigitList() {
+	private void resetCounterFromcountCharacter() {
 		for (int i = 0; i < countChars.length; i++) {
 			countChars[i] = 0;
 		}
 	}
 	
-	//solver
 	/**
-	 * Erstelle Liste mit Wörtern der vorherigen Liste, in dessen der Buchstabe NICHT vorhanden ist 
-	 * @param charDoesNotExist
+	 * Sucht aus der Liste alle wörter mit der Länge  des gesuchten Wortes heraus und löscht die restlichen 
+	 * @param lengthFromWord
+	 * @param list
 	 */
-	private void charDoesNotExist(Character charDoesNotExist) {
-		ArrayList<String> shadowList = new ArrayList<String>();
-		shadowList.addAll(list);
-		list.clear();
-		for(int i=0;i<shadowList.size();i++) {
-			if(!shadowList.get(i).contains(charDoesNotExist.toString())) {
-				list.add(shadowList.get(i));
+	private void sortFromLength(int lengthFromWord, ArrayList<String> list) {
+		for (int i = 0; i < wordList.size(); i++) {
+			int lengthWordInListe = wordList.get(i).length();
+			if(lengthWordInListe!=lengthFromWord) {
+				wordList.remove(i);
+				i--;
 			}
 		}
-		list.trimToSize();
+		wordList.trimToSize();
+		countAndSort();
 	}
 	
-	//solver
+	/**
+	 * Löscht alle Einträge der Liste, indenen der Buchstabe nicht an der selben Stelle vorhanden ist (ausgehend von dem ersten erscheinen des Buchstaben in theWord)
+	 * @param charExist
+	 */
+	private void charExist(Character charExist,char[] theWord) {
+		int indexOfChar=0;
+		//Finde stelle des Buchstaben in theWord heraus
+		for(int i =0;i<theWord.length;i++) {
+			Character theWordIndex = theWord[i];
+			if(theWordIndex==charExist) {
+				indexOfChar = i;
+				break;
+			}
+		}
+		//teste ob eingesetzte stelle des buchstaben gleich der stelle im wort von wordList ist 
+		for(int i=0;i<wordList.size();i++) {
+			if(wordList.get(i).charAt(indexOfChar)!=charExist) {
+				wordList.remove(i);
+				i--;
+			}
+		}
+		
+		wordList.trimToSize();
+	}
+		
 	/**
 	 * aufrufen der Methoden: resetCounterFromDigitList,countCharacter,sortArrays
 	 */
 	private void countAndSort() {
-		resetCounterFromDigitList();
-		countCharacter(countChars,allChars);
-		sortArrays(countChars,allChars);
+		resetCounterFromcountCharacter();
+		countCharacter(countChars,amountOfCharsInWords);
+		sortArrays(countChars,amountOfCharsInWords);
 	}
 	
-	//solver 
+	
 	/**
-	 * Sucht anhand der Wörterliste den nächhäufigst vorkommenden Buchstaben heraus 
+	 * Sucht anhand der Menge der Buchstaben in den Potentiellen Wörtern den häufigsten, noch nicht benutzten, Buchstaben heraus 
 	 * @return char 
 	 */
-	private char getChar() {
-		countAndSort();
-		int counter=0;
-		int lengeCharArray = potencialChars.length()-1;
-		System.out.println(allChars[lengeCharArray]);
-		char bestChar = potencialChars.charAt(lengeCharArray);
-		while(usedCharsList.contains(bestChar)) {
-			
-			bestChar = allChars[lengeCharArray-counter];
-			counter++;
+	private char getCharToUse(char[] amountOfCharsInAllWords) {
+		int lastCharInArrayChars = amountOfCharsInAllWords.length-1;
+		Character bestChar = amountOfCharsInAllWords[lastCharInArrayChars];
+		String alreadyUsed = usedChars.toString();
+		//solange buchstabe schon benutzt wurde -> teste nachfolgenden Buchstaben
+		while(alreadyUsed.contains(bestChar.toString())){
+			lastCharInArrayChars--;
+			bestChar = amountOfCharsInAllWords[lastCharInArrayChars];
 		}
+		this.usedChars.add(0, bestChar);
 		return bestChar;
 	}
-	
-	//hangman
-	/**
-	 * Prüft ob Buchstabe schon eingegeben wurde
-	 * @param used
-	 */
-	private void alreadyUsedChars(char used) {
-		if(usedCharsList.contains(used)) {
-			System.out.println();
-			System.out.println("Fehler! Buchstabe schon benutzt! Bitte versuchen Sie einen anderen Buchstaben");
-			System.out.println();
-			return;
-		}
-		usedCharsList.add(used);
-		System.out.println();
-		System.out.println("Ihre benutzten Buchstaben:");
-		for(int o=0;o<usedCharsList.size();o++) {
-			System.out.print(usedCharsList.get(o)+" ");
-		}
-		System.out.println();
-		System.out.println();
-	}
-	
 	
 	/**
 	 * Zählt alle Buchstaben durch die in der Liste vorhanden sind 
@@ -237,17 +241,17 @@ public class ResolveHangman {
 	 * @return
 	 */
 	private String mergeWordList() {
-		int sizeOfList = list.size();
+		int sizeOfList = wordList.size();
 		StringBuilder sb = new StringBuilder(); 
 		for(int a=0;a<sizeOfList;a++) {
-			sb = sb.append(list.get(a));
+			sb = sb.append(wordList.get(a));
 		}
 		String allWords = sb.toString();
 		return allWords;
 	}
 	
 	/**
-	 * Sortiert countChars und allChars array nach häufigkeit der vorkommenden Buchstaben (Via BubbleSort)
+	 * Sortiert countChars und allChars array nach häufigkeit hoechster zahl von CountChars (Via BubbleSort)
 	 * @param countChars
 	 * @param allChars
 	 */
@@ -266,193 +270,5 @@ public class ResolveHangman {
 			}
 		}
 	}
-	
-	/**
-	 * Liste mit möglichen Wörtern und heraussuchen eines per Zufall
-	 * @return
-	 */
-	public void listing() {
-		list.add("Stromaggregat");
-		list.add("Computergehaeuse");
-		list.add("Feuerwerk");
-		list.add("Feuerwehr");
-		list.add("Puzzleteil");
-		list.add("Pizzateig");
-		list.add("Gleichberechtigungsbeauftragter");
-		list.add("Haengewandschrankhalterung");
-		list.add("lokomotive");
-		list.add("photovoltaikanlage");
-		list.add("Autowaschanlage");
-		list.add("Element");
-		list.add("Wagenheber");
-		list.add("Haarwurzel");
-		list.add("develop");
-		list.add("Anwendungsentwickler");
-		list.add("Fachmann");
-		list.add("Feuerwehrmann");
-		list.add("Jahr");
-		list.add("Uhr");
-		list.add("Prozent");
-		list.add("Million");
-		list.add("Mensch");
-		list.add("gehen");
-		list.add("verschieden");
-		list.add("Leben");
-		list.add("allerdings");
-		list.add("verstehen");
-		list.add("Mutter");
-		list.add("ueberhaupt");
-		list.add("besonders");
-		list.add("politisch");
-		list.add("Gesellschaft");
-		list.add("moeglichkeit");
-		list.add("Unternehmen");
-		list.add("buch");
-		list.add("haben");
-		list.add("ich");
-		list.add("werden");
-		list.add("sie");
-		list.add("dies");
-		list.add("Grundstuecksverkehrsgenehmigungszustaendigkeitsuebertragungsverordnung");
-		list.add("Rindfleischetikettierungsueberwachungsaufgabenuebertragungsgesetz");
-		list.add("Verkehrsinfrastrukturfinanzierungsgesellschaft");
-		list.add("Gleichgewichtsdichtegradientenzentrifugation");
-	}
-	
-	/**
-	 * Erzeugen einer zufälligen Zahl zwischen 0 bis 10
-	 * @param maxNumber
-	 * @return
-	 */
-	private String random() {
-		int maxNumber = list.size();
-		Random wuerfel = new Random();
-		int zahl = wuerfel.nextInt(maxNumber);
-		String wort = list.get(zahl);
-		return wort;
-	}
 
-	/**
-	 * Erzeugen des Visuellen "Hangman" Fortschritt anhand von restlichen Leben
-	 * @param life
-	 */
-	private void hangingManVisual(int life) {
-		switch(life) {
-		case 8:
-			System.out.println(" ________");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 7:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 6:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 5:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |      |");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 4:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |     /|");
-			System.out.println(" |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 3:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |     /|");
-			System.out.println(" |      |");
-			System.out.println(" |");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 2:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |     /|");
-			System.out.println(" |      |");
-			System.out.println(" |     /");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 1:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      0");
-			System.out.println(" |     /|");
-			System.out.println(" |      |");
-			System.out.println(" |     / \\");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		case 0:
-			System.out.println(" ________");
-			System.out.println(" |      |");
-			System.out.println(" |      X");
-			System.out.println(" |     /|\\");
-			System.out.println(" |      |");
-			System.out.println(" |     / \\");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
-			break;
-		}
-	}
-
-	/**
-	 * Visuell Hangman v.Gewonnen
-	 */
-	private void visualWin() {
-		System.out.println(" ________");
-		System.out.println(" |      |");
-		System.out.println(" |        ");
-		System.out.println(" |        ");
-		System.out.println(" |      0 ");
-		System.out.println(" |     \\|/  ");
-		System.out.println("_|____  |  ");
-		System.out.println("|     |/_\\_");
-		System.out.println("|_________|");
-		}
 }
-	
