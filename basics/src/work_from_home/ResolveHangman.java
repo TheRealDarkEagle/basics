@@ -2,6 +2,8 @@ package work_from_home;
 
 import java.util.ArrayList;
 
+import org.omg.PortableServer.ServantActivatorHelper;
+
 public class ResolveHangman {
 	
 	private String potencialChars = "abcdefghijklmnopqrstuvwxyz";
@@ -83,7 +85,8 @@ public class ResolveHangman {
 	 * @return
 	 */
 	public char getChar(char[] theWord) {
-		StringBuffer mergeAllCharsToString = new StringBuffer();
+		replaceVowelInList();
+		StringBuilder mergeAllCharsToString = new StringBuilder();
 		for(int x=0;x<theWord.length;x++) {
 			mergeAllCharsToString = mergeAllCharsToString.append(theWord[x]);
 		}
@@ -106,7 +109,7 @@ public class ResolveHangman {
 	 */
 	private void testTheChar(char[] theWord) {
 		Character lastUsed = usedChars.get(0);
-		StringBuffer arrayIntoString = new StringBuffer();
+		StringBuilder arrayIntoString = new StringBuilder();
 		//zuerst muss ich prüfen ob ich gerade in meinem wort den ersten buchstaben herausgefunden habe 
 		if(theWord[0]==Character.toUpperCase(lastUsed)) {
 			Character checkFirstChar = theWord[0];
@@ -232,6 +235,30 @@ public class ResolveHangman {
 				if(allChars[x]==allWords.charAt(i)) {
 					countChars[x]++;
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Durchsucht alle Wörter nach Umlaute und ersetzt diese durch ae/ue/oe
+	 */
+	private void replaceVowelInList() {
+		for (int i = 0; i < wordList.size(); i++) {
+			String searchForVowel = wordList.get(i);
+			if(searchForVowel.contains("ö")) {
+				searchForVowel.replace("ö", "oe");
+				wordList.remove(i);
+				wordList.add(i, searchForVowel);
+			}
+			if(searchForVowel.contains("ä")) {
+				searchForVowel.replace("ä", "ae");
+				wordList.remove(i);
+				wordList.add(i, searchForVowel);
+			}
+			if(searchForVowel.contains("ü")) {
+				searchForVowel.replace("ü", "ue");
+				wordList.remove(i);
+				wordList.add(i, searchForVowel);
 			}
 		}
 	}
