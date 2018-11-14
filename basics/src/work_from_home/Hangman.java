@@ -1,12 +1,20 @@
 package work_from_home;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Scanner;
 
 
 public class Hangman {
 
+	/**
+	 * 
+	 * @TODO: eingabe für den benutzter erstellen - diese danach auf komische buchstaben prüfen (äöüß) und wenn vorhanden durch "normale" ersetzten 
+	 */
 	boolean isFirstCharUpperCase = false;
 	static int life =8;
 	private static Scanner character;
@@ -24,13 +32,13 @@ public class Hangman {
 	
 	/**
 	 * Startpunkt der Klasse -> aufrufen aller anderen Methoden 
+	 * @throws IOException 
 	 */
-	public void startGame() {
+	public void startGame() throws IOException {
 		if(!isHumanPlaying) {
 			this.computer = new ResolveHangman();
 		}
-		listing();
-		String wort = random();
+		String wort = insertWordManuel();
 		isFirstCharUpperCase(wort);
 		wort = toSmall(wort);
 		char[] theWord = new char[wort.length()];
@@ -117,8 +125,9 @@ public class Hangman {
 	 * @param wort
 	 * @param theWord
 	 * @return
+	 * @throws IOException 
 	 */
-	private String isWin(String wort,char[] theWord) {
+	private String isWin(String wort,char[] theWord) throws IOException {
 		String guessedWord ="";
 		for(int i=0;i<theWord.length;i++) {
 			guessedWord = guessedWord+theWord[i];		
@@ -141,8 +150,9 @@ public class Hangman {
 	 * @param wort
 	 * @param theWord
 	 * @return
+	 * @throws IOException 
 	 */
-	private String gameLogic(String wort,char[] theWord) {
+	private String gameLogic(String wort,char[] theWord) throws IOException {
 		while(life != 0) {
 			hangingManVisual(life);
 			System.out.println("Sie haben noch "+life+" Versuche");
@@ -176,11 +186,30 @@ public class Hangman {
 				return gameLogic(wort,theWord);
 			}
 		}
+		if(life==0) {
+			writeIntoWordGlossar(wort,wordBeginsUpperCase);
+		}
 		hangingManVisual(life);
 		System.out.println("Leider Verloren :(");
 		return wort;
 	}
 	
+	private void writeIntoWordGlossar(String wort, boolean wordBeginsUpperCase) throws IOException{
+		if(wordBeginsUpperCase) {
+			Character firstCharFromWord = wort.charAt(0);
+			Character FirstCharIsUpperCase = Character.toUpperCase(firstCharFromWord);
+			wort = wort.replaceFirst(firstCharFromWord.toString(), FirstCharIsUpperCase.toString());
+			
+		}
+		FileWriter fw = new FileWriter ("D:\\Danz Kai Adrian empiriecom\\Hangman\\wortsammlung.txt",true);
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.newLine();
+		bw.write(wort);
+		bw.close();
+		
+	}
+
+
 	/**
 	 * Array welches bisher eingegebene Buchstaben beeinhaltet - Prüft ob Buchstabe schon eingegeben wurde
 	 * @param used
@@ -207,100 +236,6 @@ public class Hangman {
 		u++;
 	}
 	
-	/**
-	 * Liste mit möglichen Wörtern und heraussuchen eines per Zufall
-	 * @return
-	 */
-	//Erstellen einer Liste mit Wörter
-public void listing() {
-		list.add("aalfang");
-		list.add("Stromaggregat");
-		list.add("Computergehaeuse");
-		list.add("Feuerwerk");
-		list.add("Feuerwehr");
-		list.add("Puzzleteil");
-		list.add("Pizzateig");
-		list.add("Gleichberechtigungsbeauftragter");
-		list.add("Haengewandschrankhalterung");
-		list.add("lokomotive");
-		list.add("photovoltaikanlage");
-		list.add("Autowaschanlage");
-		list.add("Element");
-		list.add("Wagenheber");
-		list.add("Haarwurzel");
-		list.add("develop");
-		list.add("Anwendungsentwickler");
-		list.add("Fachmann");
-		list.add("Feuerwehrmann");
-		list.add("Jahr");
-		list.add("Uhr");
-		list.add("Prozent");
-		list.add("Million");
-		list.add("Mensch");
-		list.add("gehen");
-		list.add("verschieden");
-		list.add("Leben");
-		list.add("allerdings");
-		list.add("verstehen");
-		list.add("Mutter");
-		list.add("ueberhaupt");
-		list.add("besonders");
-		list.add("politisch");
-		list.add("Gesellschaft");
-		list.add("moeglichkeit");
-		list.add("Unternehmen");
-		list.add("buch");
-		list.add("haben");
-		list.add("ich");
-		list.add("werden");
-		list.add("sie");
-		list.add("dies");
-		list.add("Grundstuecksverkehrsgenehmigungszustaendigkeitsuebertragungsverordnung");
-		list.add("Rindfleischetikettierungsueberwachungsaufgabenuebertragungsgesetz");
-		list.add("Verkehrsinfrastrukturfinanzierungsgesellschaft");
-		list.add("Gleichgewichtsdichtegradientenzentrifugation");
-		replaceVowelInList();
-	}
-
-	/**
-	 * Durchsucht alle Wörter nach Umlaute (ä,ü,ö) und ersetzt diese (ae/ue/oe)
-	 */
-		private void replaceVowelInList() {
-			for (int i = 0; i < list.size(); i++) {
-				if(list.get(i).contains("ä") || list.contains("ü") || list.contains("ö")) {
-					String searchForVowel = list.get(i);
-					if(searchForVowel.contains("ö")) {
-						searchForVowel.replace("ö", "oe");
-						list.remove(i);
-						list.add(i, searchForVowel);
-					}
-					if(searchForVowel.contains("ä")) {
-						searchForVowel.replace("ä", "ae");
-						list.remove(i);
-						list.add(i, searchForVowel);
-					}
-					if(searchForVowel.contains("ü")) {
-						searchForVowel.replace("ü", "ue");
-						list.remove(i);
-						list.add(i, searchForVowel);
-					}
-				}
-			}
-		}
-
-	/**
-	 * Erzeugen einer zufälligen Zahl zwischen 0 bis 10
-	 * @param maxNumber
-	 * @return
-	 */
-	private String random() {
-		int maxNumber = list.size();
-		Random wuerfel = new Random();
-		int zahl = 0+wuerfel.nextInt(maxNumber);
-		String wort = list.get(zahl);
-		return wort;
-	}
-
 	/**
 	 * Erzeugen des Visuellen "Hangman" Fortschritt anhand von restlichen Leben
 	 * @param life
@@ -423,6 +358,15 @@ public void listing() {
 		System.out.println("|     |/_\\_");
 		System.out.println("|_________|");
 		}
+
+	private String insertWordManuel() throws IOException {
+		InputStreamReader isr = new InputStreamReader(System.in);
+		BufferedReader br = new BufferedReader(isr);
+		System.out.println("Bitte geben Sie ihr Wort ein: ");
+		
+		String eingabe = br.readLine();
+		return eingabe;
+	}
 	
 }
 	
