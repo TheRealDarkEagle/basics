@@ -265,26 +265,28 @@ public void listing() {
 	/**
 	 * Durchsucht alle Wörter nach Umlaute (ä,ü,ö) und ersetzt diese (ae/ue/oe)
 	 */
-	private void replaceVowelInList() {
-		for (int i = 0; i < list.size(); i++) {
-			String searchForVowel = list.get(i);
-			if(searchForVowel.contains("ö")) {
-				searchForVowel.replace("ö", "oe");
-				list.remove(i);
-				list.add(i, searchForVowel);
-			}
-			if(searchForVowel.contains("ä")) {
-				searchForVowel.replace("ä", "ae");
-				list.remove(i);
-				list.add(i, searchForVowel);
-			}
-			if(searchForVowel.contains("ü")) {
-				searchForVowel.replace("ü", "ue");
-				list.remove(i);
-				list.add(i, searchForVowel);
+		private void replaceVowelInList() {
+			for (int i = 0; i < list.size(); i++) {
+				if(list.get(i).contains("ä") || list.contains("ü") || list.contains("ö")) {
+					String searchForVowel = list.get(i);
+					if(searchForVowel.contains("ö")) {
+						searchForVowel.replace("ö", "oe");
+						list.remove(i);
+						list.add(i, searchForVowel);
+					}
+					if(searchForVowel.contains("ä")) {
+						searchForVowel.replace("ä", "ae");
+						list.remove(i);
+						list.add(i, searchForVowel);
+					}
+					if(searchForVowel.contains("ü")) {
+						searchForVowel.replace("ü", "ue");
+						list.remove(i);
+						list.add(i, searchForVowel);
+					}
+				}
 			}
 		}
-	}
 
 	/**
 	 * Erzeugen einer zufälligen Zahl zwischen 0 bis 10

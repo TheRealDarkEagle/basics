@@ -242,21 +242,23 @@ public class ResolveHangman {
 	 */
 	private void replaceVowelInList() {
 		for (int i = 0; i < wordList.size(); i++) {
-			String searchForVowel = wordList.get(i);
-			if(searchForVowel.contains("ö")) {
-				searchForVowel.replace("ö", "oe");
-				wordList.remove(i);
-				wordList.add(i, searchForVowel);
-			}
-			if(searchForVowel.contains("ä")) {
-				searchForVowel.replace("ä", "ae");
-				wordList.remove(i);
-				wordList.add(i, searchForVowel);
-			}
-			if(searchForVowel.contains("ü")) {
-				searchForVowel.replace("ü", "ue");
-				wordList.remove(i);
-				wordList.add(i, searchForVowel);
+			if(wordList.get(i).contains("ä") || wordList.contains("ü") || wordList.contains("ö")) {
+				String searchForVowel = wordList.get(i);
+				if(searchForVowel.contains("ö")) {
+					searchForVowel.replace("ö", "oe");
+					wordList.remove(i);
+					wordList.add(i, searchForVowel);
+				}
+				if(searchForVowel.contains("ä")) {
+					searchForVowel.replace("ä", "ae");
+					wordList.remove(i);
+					wordList.add(i, searchForVowel);
+				}
+				if(searchForVowel.contains("ü")) {
+					searchForVowel.replace("ü", "ue");
+					wordList.remove(i);
+					wordList.add(i, searchForVowel);
+				}
 			}
 		}
 	}
