@@ -1,5 +1,8 @@
 package work_from_home;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ResolveHangman {
@@ -10,71 +13,23 @@ public class ResolveHangman {
 	boolean checkedForLength = false; 
 	private ArrayList<Character> usedChars = new ArrayList<Character>();
 	private ArrayList<String> wordList;
+	private BufferedReader br;
 	
-	public ResolveHangman() {
+	public ResolveHangman() throws IOException {
 		this.wordList = this.loadWordsFromFile();
 	}
 	
-	private ArrayList<String> loadWordsManual() {
-		//Datei Einlesen Und Wörter laden:
+	private ArrayList<String> loadWordsFromFile() throws IOException {
+		FileReader fr = new FileReader("D:\\Danz Kai Adrian empiriecom\\Hangman\\wortsammlung.txt");
+		br = new BufferedReader(fr);
 		
-		
-		//Aktuell Liste mit Wörtern:
-		ArrayList<String> words = new ArrayList<>();
-		words.add("aalfang");
-		words.add("Stromaggregat");
-		words.add("Computergehaeuse");
-		words.add("Feuerwerk");
-		words.add("Feuerwehr");
-		words.add("Puzzleteil");
-		words.add("Pizzateig");
-		words.add("Gleichberechtigungsbeauftragter");
-		words.add("Haengewandschrankhalterung");
-		words.add("lokomotive");
-		words.add("photovoltaikanlage");
-		words.add("Autowaschanlage");
-		words.add("Element");
-		words.add("Wagenheber");
-		words.add("Haarwurzel");
-		words.add("develop");
-		words.add("Anwendungsentwickler");
-		words.add("Fachmann");
-		words.add("Feuerwehrmann");
-		words.add("Jahr");
-		words.add("Uhr");
-		words.add("Prozent");
-		words.add("Million");
-		words.add("Mensch");
-		words.add("gehen");
-		words.add("verschieden");
-		words.add("Leben");
-		words.add("allerdings");
-		words.add("verstehen");
-		words.add("Mutter");
-		words.add("ueberhaupt");
-		words.add("besonders");
-		words.add("politisch");
-		words.add("Gesellschaft");
-		words.add("moeglichkeit");
-		words.add("Unternehmen");
-		words.add("buch");
-		words.add("haben");
-		words.add("ich");
-		words.add("werden");
-		words.add("sie");
-		words.add("dies");
-		words.add("Grundstuecksverkehrsgenehmigungszustaendigkeitsuebertragungsverordnung");
-		words.add("Rindfleischetikettierungsueberwachungsaufgabenuebertragungsgesetz");
-		words.add("Verkehrsinfrastrukturfinanzierungsgesellschaft");
-		words.add("Gleichgewichtsdichtegradientenzentrifugation");
-		return words;
-	}
-	
-	private ArrayList<String> loadWordsFromFile() {
-		/*
-		 * TODO: lade Wörter von Datei
-		 */
-		return loadWordsManual();
+		String zeile ="";
+		ArrayList<String> newList = new ArrayList<String>();
+		 while((zeile = br.readLine()) != null) {
+			 zeile = replaceVowelInWord(zeile);
+			 newList.add(zeile);
+		 }
+		 return newList;
 	}
 	
 	/**
@@ -83,12 +38,7 @@ public class ResolveHangman {
 	 * @return
 	 */
 	public char getChar(char[] theWord) {
-		replaceVowelInList();
-		StringBuilder mergeAllCharsToString = new StringBuilder();
-		for(int x=0;x<theWord.length;x++) {
-			mergeAllCharsToString = mergeAllCharsToString.append(theWord[x]);
-		}
-		
+	
 		//Wenn usedChars == empty -> remove alle Einträge mit anderer Länge aus wordList
 		if(usedChars.isEmpty()) {
 			sortFromLength(theWord.length,wordList);
@@ -140,8 +90,8 @@ public class ResolveHangman {
 				wordList.remove(a);
 			}
 		}
-		
 	}
+	
 
 	/**
 	 * Setzt alle Felder das Array countChars auf 0
@@ -190,7 +140,6 @@ public class ResolveHangman {
 				i--;
 			}
 		}
-		
 		wordList.trimToSize();
 	}
 		
@@ -240,28 +189,49 @@ public class ResolveHangman {
 	/**
 	 * Durchsucht alle Wörter nach Umlaute und ersetzt diese durch ae/ue/oe
 	 */
-	private void replaceVowelInList() {
-		for (int i = 0; i < wordList.size(); i++) {
-			if(wordList.get(i).contains("ä") || wordList.contains("ü") || wordList.contains("ö")) {
-				String searchForVowel = wordList.get(i);
-				if(searchForVowel.contains("ö")) {
-					searchForVowel.replace("ö", "oe");
-					wordList.remove(i);
-					wordList.add(i, searchForVowel);
-				}
-				if(searchForVowel.contains("ä")) {
-					searchForVowel.replace("ä", "ae");
-					wordList.remove(i);
-					wordList.add(i, searchForVowel);
-				}
-				if(searchForVowel.contains("ü")) {
-					searchForVowel.replace("ü", "ue");
-					wordList.remove(i);
-					wordList.add(i, searchForVowel);
-				}
-			}
+	private String replaceVowelInWord(String word) {
+		if(word.contains("Ã¤")) {
+			int komischesZeichen = word.indexOf('Ã');
+			word = wierdSymbol(word, komischesZeichen,1);
+			
 		}
+		if(word.contains("Ã¼")) {
+			int komischesZeichen = word.indexOf('Ã');
+			word = wierdSymbol(word, komischesZeichen,2);
+		}
+		if(word.contains("Ã¶")) {
+			int komischesZeichen = word.indexOf('Ã');
+			word = wierdSymbol(word, komischesZeichen,3);
+		}
+		if(word.contains("ÃŸ")) {
+			int komischesZeichen = word.indexOf('Ã');
+			word = wierdSymbol(word, komischesZeichen,4);
+		}
+		return word;		
 	}
+
+	private String wierdSymbol(String word, int komischesZeichen, int welchesZeichen) {
+		String teilLinks = word.substring(0, komischesZeichen);
+		String teilRechts = word.substring(komischesZeichen+2, word.length());
+		switch(welchesZeichen) {
+		case 1:
+			word = teilLinks + "ae" + teilRechts;
+			break;
+		case 2:
+			word = teilLinks + "ue" + teilRechts;
+			break;
+		case 3:
+			word = teilLinks+ "oe" + teilRechts;
+			break;
+		case 4: 
+			word = teilLinks + "ss" + teilRechts;
+			break;
+		}
+		
+		return word;
+	}
+			
+		
 	
 	/**
 	 * Setzt alle wörter zu einem ganzen String zusammen
@@ -297,5 +267,5 @@ public class ResolveHangman {
 			}
 		}
 	}
-
+	
 }
