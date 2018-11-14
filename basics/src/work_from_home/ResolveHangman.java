@@ -2,8 +2,6 @@ package work_from_home;
 
 import java.util.ArrayList;
 
-import org.omg.PortableServer.ServantActivatorHelper;
-
 public class ResolveHangman {
 	
 	private String potencialChars = "abcdefghijklmnopqrstuvwxyz";
