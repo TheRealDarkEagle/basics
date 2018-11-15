@@ -1,11 +1,29 @@
 package work_from_home;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ResolveHangman {
+	
+	/**
+	 * @TODO: beziehungen zwischen den buchstaben einfï¿½gen
+	 * teste zweiten bis vorletzten buchstabe
+	 * schaue davor und danach welche buchstaben dastehen
+	 * speichere mï¿½gliche variation in datei 
+	 * wenn kein wort mehr in liste ist 
+	 * gehe auf diese datei zurï¿½ck 
+	 * und schaue nach welche buchstaben man als besten fï¿½r die leeren felder einsetzen kï¿½nnte
+	 * 
+	 * z.b. Apf_ltasch_ wie oft kam bisher ein buchstabe nach einem f 
+	 * wie oft kam bisher ein buchstabe nach einem h 
+	 * wie oft kam bisher ein buchstabe vor w 
+	 * anhand dessen buchstaben nehmen falls er noch nicht benutzt wurde  
+	 *
+	 */
 	
 	private String potencialChars = "abcdefghijklmnopqrstuvwxyz";
 	private int[] countChars= new int[potencialChars.length()];
@@ -13,33 +31,62 @@ public class ResolveHangman {
 	boolean checkedForLength = false; 
 	private ArrayList<Character> usedChars = new ArrayList<Character>();
 	private ArrayList<String> wordList;
-	private BufferedReader br;
 	
 	public ResolveHangman() throws IOException {
 		this.wordList = this.loadWordsFromFile();
 	}
 	
+	/**
+	 * Trennt die ListenwÃ¶rter voneinander und speichert sie in liste ab
+	 * @param sb
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static ArrayList<String> splitWordsFromList(StringBuilder sb) throws FileNotFoundException, IOException {
+		ArrayList<String> alSpli = new ArrayList<String>();
+		int start = 0;
+		int ende = 0;
+		for(int i=0;i<sb.length();i++) {
+			int zahl = sb.charAt(i);
+				if(zahl==13) {
+				ende = i;
+				String temp = sb.substring(start, ende);
+				alSpli.add(temp);
+			}
+			if(zahl==10) {
+				start = i+1;
+			}
+		}
+		return alSpli;
+	}
+
+	/**
+	 * LÃ¤d alle WÃ¶rter aus Datei und gibt die aneinanderhÃ¤ngende Sammlunng an splitWordsFromList() weiter
+	 * @return
+	 * @throws IOException
+	 */
 	private ArrayList<String> loadWordsFromFile() throws IOException {
-		FileReader fr = new FileReader("D:\\Danz Kai Adrian empiriecom\\Hangman\\wortsammlung.txt");
-		br = new BufferedReader(fr);
-		
-		String zeile ="";
-		ArrayList<String> newList = new ArrayList<String>();
-		 while((zeile = br.readLine()) != null) {
-			 zeile = replaceVowelInWord(zeile);
-			 newList.add(zeile);
-		 }
-		 return newList;
+		try(InputStream is = new FileInputStream("D:\\Danz Kai Adrian empiriecom\\Hangman\\wortsammlung.txt")){
+			byte[] buffer = new byte[1024];
+			StringBuilder sb = new StringBuilder();
+			
+			int bytesRead = is.read(buffer);
+			while(bytesRead > 0) {
+				sb.append(new String(Arrays.copyOfRange(buffer, 0, bytesRead), "UTF-8"));
+				bytesRead = is.read(buffer);
+			}
+		 return (new ArrayList<String>(splitWordsFromList(sb)));
+		}
 	}
 	
 	/**
-	 * Findet den naechsten Buchstaben anhand aller Bekannten Wörter 
+	 * Findet den naechsten Buchstaben anhand aller Bekannten Wï¿½rter 
 	 * @param theWord
 	 * @return
 	 */
 	public char getChar(char[] theWord) {
-	
-		//Wenn usedChars == empty -> remove alle Einträge mit anderer Länge aus wordList
+		//Wenn usedChars == empty -> remove alle Eintrï¿½ge mit anderer Lï¿½nge aus wordList
 		if(usedChars.isEmpty()) {
 			sortFromLength(theWord.length,wordList);
 			return getCharToUse(amountOfCharsInWords);
@@ -52,13 +99,13 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Prüfe ob zuletzt benutzter Buchstabe im Wort vorhanden war
+	 * Prï¿½fe ob zuletzt benutzter Buchstabe im Wort vorhanden war
 	 * @param theWord
 	 */
 	private void testTheChar(char[] theWord) {
 		Character lastUsed = usedChars.get(0);
 		StringBuilder arrayIntoString = new StringBuilder();
-		//zuerst muss ich prüfen ob ich gerade in meinem wort den ersten buchstaben herausgefunden habe 
+		//zuerst muss ich prï¿½fen ob ich gerade in meinem wort den ersten buchstaben herausgefunden habe 
 		if(theWord[0]==Character.toUpperCase(lastUsed)) {
 			Character checkFirstChar = theWord[0];
 			if(!checkFirstChar.toString().equals(potencialChars)) {
@@ -80,7 +127,7 @@ public class ResolveHangman {
 	}
 
 	/**
-	 * Entfernt alle Wörter, welche den zuletzt benutzten Buchstaben beinhalten
+	 * Entfernt alle Wï¿½rter, welche den zuletzt benutzten Buchstaben beinhalten
 	 * @param charExist
 	 * @param theWord
 	 */
@@ -103,7 +150,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Sucht aus der Liste alle wörter mit der Länge  des gesuchten Wortes heraus und löscht die restlichen 
+	 * Sucht aus der Liste alle wï¿½rter mit der Lï¿½nge  des gesuchten Wortes heraus und lï¿½scht die restlichen 
 	 * @param lengthFromWord
 	 * @param list
 	 */
@@ -120,7 +167,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Löscht alle Einträge der Liste, indenen der Buchstabe nicht an der selben Stelle vorhanden ist (ausgehend von dem ersten erscheinen des Buchstaben in theWord)
+	 * Lï¿½scht alle Eintrï¿½ge der Liste, indenen der Buchstabe nicht an der selben Stelle vorhanden ist (ausgehend von dem ersten erscheinen des Buchstaben in theWord)
 	 * @param charExist
 	 */
 	private void charExist(Character charExist,char[] theWord) {
@@ -154,7 +201,7 @@ public class ResolveHangman {
 	
 	
 	/**
-	 * Sucht anhand der Menge der Buchstaben in den Potentiellen Wörtern den häufigsten, noch nicht benutzten, Buchstaben heraus 
+	 * Sucht anhand der Menge der Buchstaben in den Potentiellen Wï¿½rtern den hï¿½ufigsten, noch nicht benutzten, Buchstaben heraus 
 	 * @return char 
 	 */
 	private char getCharToUse(char[] amountOfCharsInAllWords) {
@@ -171,7 +218,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Zählt alle Buchstaben durch die in der Liste vorhanden sind 
+	 * Zï¿½hlt alle Buchstaben durch die in der Liste vorhanden sind 
 	 * @param countChars
 	 * @param allChars
 	 */
@@ -187,54 +234,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Durchsucht alle Wörter nach Umlaute und ersetzt diese durch ae/ue/oe
-	 */
-	private String replaceVowelInWord(String word) {
-		if(word.contains("Ã¤")) {
-			int komischesZeichen = word.indexOf('Ã');
-			word = wierdSymbol(word, komischesZeichen,1);
-			
-		}
-		if(word.contains("Ã¼")) {
-			int komischesZeichen = word.indexOf('Ã');
-			word = wierdSymbol(word, komischesZeichen,2);
-		}
-		if(word.contains("Ã¶")) {
-			int komischesZeichen = word.indexOf('Ã');
-			word = wierdSymbol(word, komischesZeichen,3);
-		}
-		if(word.contains("ÃŸ")) {
-			int komischesZeichen = word.indexOf('Ã');
-			word = wierdSymbol(word, komischesZeichen,4);
-		}
-		return word;		
-	}
-
-	private String wierdSymbol(String word, int komischesZeichen, int welchesZeichen) {
-		String teilLinks = word.substring(0, komischesZeichen);
-		String teilRechts = word.substring(komischesZeichen+2, word.length());
-		switch(welchesZeichen) {
-		case 1:
-			word = teilLinks + "ae" + teilRechts;
-			break;
-		case 2:
-			word = teilLinks + "ue" + teilRechts;
-			break;
-		case 3:
-			word = teilLinks+ "oe" + teilRechts;
-			break;
-		case 4: 
-			word = teilLinks + "ss" + teilRechts;
-			break;
-		}
-		
-		return word;
-	}
-			
-		
-	
-	/**
-	 * Setzt alle wörter zu einem ganzen String zusammen
+	 * Setzt alle wï¿½rter zu einem ganzen String zusammen
 	 * @return
 	 */
 	private String mergeWordList() {
@@ -248,7 +248,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Sortiert countChars und allChars array nach häufigkeit hoechster zahl von CountChars (Via BubbleSort)
+	 * Sortiert countChars und allChars array nach hï¿½ufigkeit hoechster zahl von CountChars (Via BubbleSort)
 	 * @param countChars
 	 * @param allChars
 	 */
