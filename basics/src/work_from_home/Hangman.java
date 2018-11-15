@@ -11,10 +11,6 @@ import java.util.Scanner;
 
 public class Hangman {
 
-	/**
-	 * 
-	 * @TODO: eingabe für den benutzter erstellen - diese danach auf komische buchstaben prüfen (äöüß) und wenn vorhanden durch "normale" ersetzten 
-	 */
 	boolean isFirstCharUpperCase = false;
 	static int life =8;
 	private static Scanner character;
@@ -39,6 +35,7 @@ public class Hangman {
 			this.computer = new ResolveHangman();
 		}
 		String wort = insertWordManuel();
+		wort = changeWierdChars(wort);
 		isFirstCharUpperCase(wort);
 		wort = toSmall(wort);
 		char[] theWord = new char[wort.length()];
@@ -49,9 +46,70 @@ public class Hangman {
 			usedChars[s]='.';
 		}
 		gameLogic(wort,theWord);
-		
+	}
+	
+	/**
+	 * Durchsucht Word nach ï¿½ ï¿½ ï¿½ ï¿½ wenn gefunden gibt stelle des Zeichen an wierdSymbol
+	 * @param word
+	 * @return
+	 */
+	private String changeWierdChars(String word) {
+		if(word.contains("Ã¤") ||
+		   word.contains("Ã¼") ||
+		   word.contains("Ã¶") ||
+		   word.contains("ÃŸ")) {
+			if(word.contains("Ã¤")) {
+				int komischesZeichen = word.indexOf('Ã¤');
+				word = wierdSymbol(word, komischesZeichen,1);
+				
+			}
+			if(word.contains("Ã¼")) {
+				int komischesZeichen = word.indexOf('Ã¼');
+				word = wierdSymbol(word, komischesZeichen,2);
+			}
+			if(word.contains("Ã¶")) {
+				int komischesZeichen = word.indexOf('Ã¶');
+				word = wierdSymbol(word, komischesZeichen,3);
+			}
+			if(word.contains("ÃŸ")) {
+				int komischesZeichen = word.indexOf('ÃŸ');
+				word = wierdSymbol(word, komischesZeichen,4);
+			}
+		}
+		return word;
 	}
 
+	/**
+	 * Durchsucht Word nach Ã¤ Ã¼ Ã¶ ÃŸ und ersetzt diese durch ae ue oe ss
+	 * @param word
+	 * @param komischesZeichen
+	 * @param welchesZeichen
+	 * @return
+	 */
+	private String wierdSymbol(String word, int komischesZeichen, int welchesZeichen) {
+		String teilLinks = word.substring(0, komischesZeichen);
+		String teilRechts = word.substring(komischesZeichen+1, word.length());
+		switch(welchesZeichen) {
+		case 1:
+			word = teilLinks + "ae" + teilRechts;
+			break;
+		case 2:
+			word = teilLinks + "ue" + teilRechts;
+			break;
+		case 3:
+			word = teilLinks+ "oe" + teilRechts;
+			break;
+		case 4: 
+			word = teilLinks + "ss" + teilRechts;
+			break;
+		}
+		return word;
+	}
+	
+	/**
+	 * Prï¿½ft ob erster Buchstabe groï¿½ oder kleingeschrieben ist
+	 * @param wort
+	 */
 	private void isFirstCharUpperCase(String wort) {
 		String posibilUpperChars ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		Character firstChar = wort.charAt(0);
@@ -60,22 +118,6 @@ public class Hangman {
 				wordBeginsUpperCase = true;
 			}
 		}
-		
-	}
-
-
-	/**
-	 * Eingabe des zu erratenden Wortes -> momentan Obsolet!
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	private String insertWord() {
-		System.out.println("Geben Sie bitte Ihr Wort ein!: ");
-		Scanner sc = new Scanner(System.in);
-		String wort = sc.next();
-		sc.close();
-		wort = toSmall(wort);
-		return wort;
 	}
 	
 	/**
@@ -99,7 +141,7 @@ public class Hangman {
 	}
 	
 	/**
-	 * befüllung der leeren Array Felder mit . -> wenn in array[i]=='.' darstellung durch _ 
+	 * befï¿½llung der leeren Array Felder mit . -> wenn in array[i]=='.' darstellung durch _ 
 	 * @param theWord
 	 */
 	private static void printOnScreen(char[] theWord) {
@@ -121,7 +163,7 @@ public class Hangman {
 	}
 
 	/**
-	 * Prüft bisher eingegebene Buchstaben ob zusammengesetzt gleich dem Suchwort.
+	 * Prï¿½ft bisher eingegebene Buchstaben ob zusammengesetzt gleich dem Suchwort.
 	 * @param wort
 	 * @param theWord
 	 * @return
@@ -171,7 +213,7 @@ public class Hangman {
 			}
 			
 			String a = toTest.toString();
-			//prüfe ob buchstabe vorhanden
+			//prï¿½fe ob buchstabe vorhanden
 			if(wort.contains(a)) {
 				for(int i=0;i<wort.length();i++) {
 					if(wort.charAt(i)==toTest) {
@@ -186,14 +228,18 @@ public class Hangman {
 				return gameLogic(wort,theWord);
 			}
 		}
-		if(life==0) {
-			writeIntoWordGlossar(wort,wordBeginsUpperCase);
-		}
 		hangingManVisual(life);
 		System.out.println("Leider Verloren :(");
+		writeIntoWordGlossar(wort,wordBeginsUpperCase);
 		return wort;
 	}
 	
+	/**
+	 * Fï¿½gt Wort (Wenn nicht gefunden) in Glossar hinzu
+	 * @param wort
+	 * @param wordBeginsUpperCase
+	 * @throws IOException
+	 */
 	private void writeIntoWordGlossar(String wort, boolean wordBeginsUpperCase) throws IOException{
 		if(wordBeginsUpperCase) {
 			Character firstCharFromWord = wort.charAt(0);
@@ -211,7 +257,7 @@ public class Hangman {
 
 
 	/**
-	 * Array welches bisher eingegebene Buchstaben beeinhaltet - Prüft ob Buchstabe schon eingegeben wurde
+	 * Array welches bisher eingegebene Buchstaben beeinhaltet - Prï¿½ft ob Buchstabe schon eingegeben wurde
 	 * @param used
 	 */
 	private void alreadyUsedChars(char used) {
@@ -359,6 +405,11 @@ public class Hangman {
 		System.out.println("|_________|");
 		}
 
+	/**
+	 * Wort wird manuell eingefÃ¼gt
+	 * @return
+	 * @throws IOException
+	 */
 	private String insertWordManuel() throws IOException {
 		InputStreamReader isr = new InputStreamReader(System.in);
 		BufferedReader br = new BufferedReader(isr);
