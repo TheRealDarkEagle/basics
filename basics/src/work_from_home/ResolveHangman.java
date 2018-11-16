@@ -6,11 +6,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ResolveHangman {
 	
 	/**
-	 * @TODO: beziehungen zwischen den buchstaben einf�gen
+	 * @TODO: 
+	 * Überprüfen ob die Variablen die Global sind auch global sein müssen 
+	 * 
+	 * Variablen NICHT Static machen! 
+	 * 
+	 * Kommentare einfügen, wenn mehrere Operation in einer Methode ausgeführt werden, und erklären was gerade passiert
+	 * 
+	 * beziehungen zwischen den buchstaben einf�gen
 	 * teste zweiten bis vorletzten buchstabe
 	 * schaue davor und danach welche buchstaben dastehen
 	 * speichere m�gliche variation in datei 
@@ -23,14 +31,17 @@ public class ResolveHangman {
 	 * wie oft kam bisher ein buchstabe vor w 
 	 * anhand dessen buchstaben nehmen falls er noch nicht benutzt wurde  
 	 *
+	 * Genauigkeit erhöhen welche Listenelemente nicht entfernt  bzw entfernt werden
+	 * Wenn der buchstabe öfter als 1x vorkommt - teste die restlichen stellen auch -> führt zu einer besseren Genauigkeit der Wörterauswahl 
 	 */
 	
-	private String potencialChars = "abcdefghijklmnopqrstuvwxyz";
+	private String potencialChars = "abcdefghijklmnopqrstuvwxyzäöüß";
 	private int[] countChars= new int[potencialChars.length()];
 	private char[] amountOfCharsInWords = potencialChars.toCharArray();
 	boolean checkedForLength = false; 
 	private ArrayList<Character> usedChars = new ArrayList<Character>();
 	private ArrayList<String> wordList;
+	
 	
 	public ResolveHangman() throws IOException {
 		this.wordList = this.loadWordsFromFile();
@@ -49,13 +60,22 @@ public class ResolveHangman {
 		int ende = 0;
 		for(int i=0;i<sb.length();i++) {
 			int zahl = sb.charAt(i);
+				//13 = Zeilenumbruch
 				if(zahl==13) {
 				ende = i;
 				String temp = sb.substring(start, ende);
 				alSpli.add(temp);
 			}
+			//10 = Zeilenvorschub
 			if(zahl==10) {
 				start = i+1;
+			}
+			if(i==sb.length()-1) {
+				//Wenn i am letzten buchstaben angekommen ist
+				//ist dies mein letztes wort von anfang bis i+1
+				ende = i+1;
+				String temp = sb.substring(start, ende);
+				alSpli.add(temp);
 			}
 		}
 		return alSpli;
@@ -76,7 +96,7 @@ public class ResolveHangman {
 				sb.append(new String(Arrays.copyOfRange(buffer, 0, bytesRead), "UTF-8"));
 				bytesRead = is.read(buffer);
 			}
-		 return (new ArrayList<String>(splitWordsFromList(sb)));
+		return (splitWordsFromList(sb));
 		}
 	}
 	
@@ -86,7 +106,7 @@ public class ResolveHangman {
 	 * @return
 	 */
 	public char getChar(char[] theWord) {
-		//Wenn usedChars == empty -> remove alle Eintr�ge mit anderer L�nge aus wordList
+		//Wenn usedChars == empty -> remove alle Einträge mit anderer Länge aus wordList
 		if(usedChars.isEmpty()) {
 			sortFromLength(theWord.length,wordList);
 			return getCharToUse(amountOfCharsInWords);
@@ -99,19 +119,18 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Pr�fe ob zuletzt benutzter Buchstabe im Wort vorhanden war
+	 * Prüfe ob zuletzt benutzter Buchstabe im Wort vorhanden war
 	 * @param theWord
 	 */
 	private void testTheChar(char[] theWord) {
 		Character lastUsed = usedChars.get(0);
 		StringBuilder arrayIntoString = new StringBuilder();
-		//zuerst muss ich pr�fen ob ich gerade in meinem wort den ersten buchstaben herausgefunden habe 
+		//Wenn letzter benutzter Buchstabe gleich  index 0 von theWord in groß ist groß ist 
 		if(theWord[0]==Character.toUpperCase(lastUsed)) {
 			Character checkFirstChar = theWord[0];
-			if(!checkFirstChar.toString().equals(potencialChars)) {
-				lastUsed = checkFirstChar;
-				charExist(lastUsed, theWord);
-				}
+			lastUsed = checkFirstChar;
+			// never 
+			charExist(lastUsed=checkFirstChar, theWord);
 		}else {
 			for(int a=0; a<theWord.length;a++) {
 				arrayIntoString = arrayIntoString.append(theWord[a]);
@@ -127,14 +146,17 @@ public class ResolveHangman {
 	}
 
 	/**
-	 * Entfernt alle W�rter, welche den zuletzt benutzten Buchstaben beinhalten
+	 * Entfernt alle Wörter, welche den zuletzt benutzten Buchstaben beinhalten
 	 * @param charExist
 	 * @param theWord
 	 */
 	private void charDoesNotExist(Character charExist,char[] theWord) {
 		for(int a =0; a<wordList.size();a++) {
-			if(wordList.get(a).contains(charExist+"")) {
-				wordList.remove(a);
+			Character lastUsed = Character.toUpperCase(charExist);
+			if(wordList.get(a).contains(lastUsed.toString().toLowerCase()) || 
+			   wordList.get(a).contains(lastUsed.toString())) {
+					wordList.remove(a);
+					a--;
 			}
 		}
 	}
@@ -167,27 +189,29 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * L�scht alle Eintr�ge der Liste, indenen der Buchstabe nicht an der selben Stelle vorhanden ist (ausgehend von dem ersten erscheinen des Buchstaben in theWord)
+	 * Löscht alle Einträge der Liste, indenen der Buchstabe nicht an der selben Stelle vorhanden ist (ausgehend von dem ersten erscheinen des Buchstaben in theWord)
 	 * @param charExist
+	 * @TODO: Prüfe ob buchstabe vor stelle theWord vorkommt wenn ja remove aus liste  
 	 */
+	//Prüfe solange bis am letzten buchstaben angekommen 
 	private void charExist(Character charExist,char[] theWord) {
 		int indexOfChar=0;
 		//Finde stelle des Buchstaben in theWord heraus
 		for(int i =0;i<theWord.length;i++) {
-			Character theWordIndex = theWord[i];
-			if(theWordIndex==charExist) {
+			Character theWordCharAtIndex = theWord[i];
+			if(theWordCharAtIndex==charExist) {
 				indexOfChar = i;
-				break;
-			}
-		}
-		//teste ob eingesetzte stelle des buchstaben gleich der stelle im wort von wordList ist 
-		for(int i=0;i<wordList.size();i++) {
-			if(wordList.get(i).charAt(indexOfChar)!=charExist) {
-				wordList.remove(i);
-				i--;
+				//teste ob eingesetzte stelle des buchstaben gleich der stelle im wort von wordList ist 
+				for(int a=0;a<wordList.size();a++) {
+					if(wordList.get(a).charAt(indexOfChar)!=charExist) {
+						wordList.remove(a);
+						a--;
+					}
+				}
 			}
 		}
 		wordList.trimToSize();
+		countAndSort();
 	}
 		
 	/**
@@ -234,7 +258,7 @@ public class ResolveHangman {
 	}
 	
 	/**
-	 * Setzt alle w�rter zu einem ganzen String zusammen
+	 * Setzt alle wörter zu einem ganzen String zusammen
 	 * @return
 	 */
 	private String mergeWordList() {
@@ -255,17 +279,19 @@ public class ResolveHangman {
 	private void sortArrays(int[] countChars, char[] allChars) {
 		for(int o=0;o<allChars.length;o++) {
 			for(int a=1;a<allChars.length;a++) {
+				// wemm die Anzahl der vorkommenden Wörter unterschiedlich ist, dann tausche:
 				if(countChars[a-1]>countChars[a]) {
+					// die Anzahl miteinander
 					int tempZahl = countChars[a];
-					char tempChar = allChars[a];
 					countChars[a] = countChars[a-1];
-					allChars[a] = allChars[a-1];
 					countChars[a-1] = tempZahl;
+					// die Buchstaben miteinander
+					char tempChar = allChars[a];
+					allChars[a] = allChars[a-1];
 					allChars[a-1] = tempChar;
 					
 				}
 			}
 		}
 	}
-	
 }

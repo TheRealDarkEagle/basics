@@ -14,9 +14,10 @@ public class HangmanMain {
 		System.out.println();
 		System.out.println("           Willkommen zu Hangman! Viel Spa� beim Spielen :)");
 		System.out.println();
-		System.out.println("Wer soll Spielen? Dr�cken Sie M fuer Mensch und C f�r Computer!");
+		System.out.println("Wer soll Spielen? Dr�cken Sie M fuer Mensch und C für Computer!");
 		auswahl = new Scanner(System.in);
 		String auswahlDesSpielers = auswahl.nextLine();
+		//to lower case einfügen anstatt beide cases prüfen
 		if(auswahlDesSpielers.length() != 1) {
 			throw new IllegalArgumentException("Bitte geben Sie nur einen Buchstaben ein!");
 		}

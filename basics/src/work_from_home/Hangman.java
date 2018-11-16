@@ -11,13 +11,23 @@ import java.util.Scanner;
 
 public class Hangman {
 
-	boolean isFirstCharUpperCase = false;
-	static int life =8;
-	private static Scanner character;
-	char[] usedChars = new char[25];
-	int u = 0;
+	/**
+	 * TODO:
+	 * Müssen die Globalen Variablen wirklich global sein? 
+	 * 
+	 *  Überarbeitung von ALLEN Ausgaben! überlegen welche ausgaben ich wirklich brauche und wie ich mein hangman "schneller" schreiben könnte bzw mir 
+	 *  Code spare indem ich verschiedene Bereiche "zusammenfasse"
+	 */
+	
+	//überarbeiten
+	private boolean isFirstCharUpperCase = false;
+	private int life =8;
+	private Scanner character;
+	private char[] usedChars = new char[25];
+	private int u = 0;
+	// wo brauchen wir computer wirklich? Macht es als Globale Variable Sinn?
 	private ResolveHangman computer;
-	ArrayList<String> list = new ArrayList<String>();
+	private ArrayList<String> list = new ArrayList<String>();
 	private boolean isHumanPlaying = false;
 	private static boolean wordBeginsUpperCase;
 	
@@ -35,7 +45,7 @@ public class Hangman {
 			this.computer = new ResolveHangman();
 		}
 		String wort = insertWordManuel();
-		wort = changeWierdChars(wort);
+//		wort = changeWierdChars(wort);
 		isFirstCharUpperCase(wort);
 		wort = toSmall(wort);
 		char[] theWord = new char[wort.length()];
@@ -46,64 +56,6 @@ public class Hangman {
 			usedChars[s]='.';
 		}
 		gameLogic(wort,theWord);
-	}
-	
-	/**
-	 * Durchsucht Word nach � � � � wenn gefunden gibt stelle des Zeichen an wierdSymbol
-	 * @param word
-	 * @return
-	 */
-	private String changeWierdChars(String word) {
-		if(word.contains("ä") ||
-		   word.contains("ü") ||
-		   word.contains("ö") ||
-		   word.contains("ß")) {
-			if(word.contains("ä")) {
-				int komischesZeichen = word.indexOf('ä');
-				word = wierdSymbol(word, komischesZeichen,1);
-				
-			}
-			if(word.contains("ü")) {
-				int komischesZeichen = word.indexOf('ü');
-				word = wierdSymbol(word, komischesZeichen,2);
-			}
-			if(word.contains("ö")) {
-				int komischesZeichen = word.indexOf('ö');
-				word = wierdSymbol(word, komischesZeichen,3);
-			}
-			if(word.contains("ß")) {
-				int komischesZeichen = word.indexOf('ß');
-				word = wierdSymbol(word, komischesZeichen,4);
-			}
-		}
-		return word;
-	}
-
-	/**
-	 * Durchsucht Word nach ä ü ö ß und ersetzt diese durch ae ue oe ss
-	 * @param word
-	 * @param komischesZeichen
-	 * @param welchesZeichen
-	 * @return
-	 */
-	private String wierdSymbol(String word, int komischesZeichen, int welchesZeichen) {
-		String teilLinks = word.substring(0, komischesZeichen);
-		String teilRechts = word.substring(komischesZeichen+1, word.length());
-		switch(welchesZeichen) {
-		case 1:
-			word = teilLinks + "ae" + teilRechts;
-			break;
-		case 2:
-			word = teilLinks + "ue" + teilRechts;
-			break;
-		case 3:
-			word = teilLinks+ "oe" + teilRechts;
-			break;
-		case 4: 
-			word = teilLinks + "ss" + teilRechts;
-			break;
-		}
-		return word;
 	}
 	
 	/**
@@ -124,7 +76,7 @@ public class Hangman {
 	 * Eingabe des Buchstaben 
 	 * @return
 	 */
-	public static char letter() {
+	public char letter() {
 		character = new Scanner(System.in);
 		char c = character.next().charAt(0);
 		return c;
@@ -135,7 +87,7 @@ public class Hangman {
 	 * @param wort
 	 * @return
 	 */
-	private static String toSmall(String wort) {
+	private String toSmall(String wort) {
 		wort = wort.toLowerCase();
 		return wort;
 	}
@@ -144,6 +96,7 @@ public class Hangman {
 	 * bef�llung der leeren Array Felder mit . -> wenn in array[i]=='.' darstellung durch _ 
 	 * @param theWord
 	 */
+	//ausgabe überarbeiten 
 	private static void printOnScreen(char[] theWord) {
 		for(int i=0;i<theWord.length;i++) {
 			if(theWord[i]!='.') {
@@ -196,11 +149,11 @@ public class Hangman {
 	 */
 	private String gameLogic(String wort,char[] theWord) throws IOException {
 		while(life != 0) {
-			hangingManVisual(life);
+			hangingManVisual();
 			System.out.println("Sie haben noch "+life+" Versuche");
 			printOnScreen(theWord);
 			System.out.println();
-			System.out.println("Bitte geben sie Ihren Buchstaben ein:");
+			System.out.println("Bitte geben sie Ihren Buchst<aben ein:");
 			Character toTest = ' ';
 			if(isHumanPlaying) {
 				toTest = letter();
@@ -228,7 +181,7 @@ public class Hangman {
 				return gameLogic(wort,theWord);
 			}
 		}
-		hangingManVisual(life);
+		hangingManVisual();
 		System.out.println("Leider Verloren :(");
 		writeIntoWordGlossar(wort,wordBeginsUpperCase);
 		return wort;
@@ -286,7 +239,7 @@ public class Hangman {
 	 * Erzeugen des Visuellen "Hangman" Fortschritt anhand von restlichen Leben
 	 * @param life
 	 */
-	private void hangingManVisual(int life) {
+	private void hangingManVisual() {
 		switch(life) {
 		case 8:
 			System.out.println(" ________");
@@ -383,11 +336,11 @@ public class Hangman {
 			System.out.println(" |     /|\\");
 			System.out.println(" |      |");
 			System.out.println(" |     / \\");
-			System.out.println("_|____");
-			System.out.println("|     |___");
-			System.out.println("|_________|");
 			break;
 		}
+		System.out.println("_|____");
+		System.out.println("|     |___");
+		System.out.println("|_________|");
 	}
 
 	/**
